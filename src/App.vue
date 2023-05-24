@@ -3,8 +3,8 @@
     <h1>{{ simple }} CMS</h1>
     <div>by FrameCore</div>
     <div class="collection-wrapper">
-      <div>Kollektion1</div>
-      <div>Kollektion2</div>
+      <div class="collection-text">Kollektion1</div>
+      <div class="collection-text">Kollektion2</div>
     </div>
     <div class="text-s">Add, edit or remove content below</div>
     <div class="form-block w-form">
@@ -15,7 +15,11 @@
         method="get"
         class="cms-item-wrapper"
       >
-        <div class="cms-item">
+        <div
+          v-for="(item, index) of items"
+          @click="handleClick(index)"
+          class="cms-item"
+        >
           <div id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5">
             Titel
           </div>
@@ -34,6 +38,7 @@
           <div
             id="w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5"
             class="cms-inputs"
+            v-show="showItem === index"
           >
             <div
               id="w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5"
@@ -126,15 +131,61 @@
 </template>
 
 <script>
-// import { ref } from "vue";
-
 export default {
   name: "App",
 
   data() {
     return {
+      items: {},
+      userName: "FrameCore",
+      userPass: "CMS-development",
+      cmsGetWebhook: "https://api.framecore.se/webhook/simple-cms-get",
       simple: "simple",
+      showItem: false,
     };
+  },
+
+  created() {
+    this.getCmsData();
+  },
+
+  methods: {
+    handleClick(index) {
+      if (this.showItem === index) {
+        this.showItem = false;
+      } else {
+        this.showItem = index;
+      }
+    },
+
+    getCmsData() {
+      var requestOptions = {
+        method: "GET",
+        headers: {
+          Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
+        },
+        redirect: "follow",
+      };
+
+      fetch(this.cmsGetWebhook, requestOptions)
+        .then((response) => {
+          if (!response.ok) throw new Error();
+          return response.json();
+        })
+        .then((result) => {
+          console.log(result);
+          this.items = result;
+        })
+        .catch((error) => console.log(error));
+    },
+
+    getCookie(name) {
+      var value = "; " + document.cookie;
+      var parts = value.split("; " + name + "=");
+      if (parts.length === 2) {
+        return parts.pop().split(";").shift();
+      }
+    },
   },
 };
 </script>

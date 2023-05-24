@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-  font-variation-settings: "opsz"35.8, "wdth"99.5, "wght"594;
+  font-variation-settings: "opsz" 35.8, "wdth" 99.5, "wght" 594;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -20,7 +20,7 @@ h1 {
 }
 
 h2 {
-  font-variation-settings: "wdth"100;
+  font-variation-settings: "wdth" 100;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -30,7 +30,7 @@ h2 {
 }
 
 h3 {
-  font-variation-settings: "wdth"100;
+  font-variation-settings: "wdth" 100;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -40,7 +40,7 @@ h3 {
 }
 
 h4 {
-  font-variation-settings: "wdth"100;
+  font-variation-settings: "wdth" 100;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -50,7 +50,7 @@ h4 {
 }
 
 h5 {
-  font-variation-settings: "wdth"100;
+  font-variation-settings: "wdth" 100;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -60,7 +60,7 @@ h5 {
 }
 
 h6 {
-  font-variation-settings: "wdth"100;
+  font-variation-settings: "wdth" 100;
   margin-top: 0;
   margin-bottom: 1rem;
   font-family: Exo, sans-serif;
@@ -79,7 +79,7 @@ a {
 }
 
 a:hover {
-  color: rgba(255, 255, 255, .7);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 label {
@@ -93,7 +93,7 @@ label {
 
 blockquote {
   font-variation-settings: normal;
-  border-left: .3rem solid rgba(255, 255, 255, .3);
+  border-left: 0.3rem solid rgba(255, 255, 255, 0.3);
   margin-bottom: 1rem;
   padding: 1rem;
   font-family: PT Sans, sans-serif;
@@ -127,7 +127,7 @@ blockquote {
   max-width: 90rem;
   flex-direction: column;
   grid-template-rows: auto;
-  grid-template-columns: minmax(12rem, .25fr) 1fr minmax(12rem, .25fr);
+  grid-template-columns: minmax(12rem, 0.25fr) 1fr minmax(12rem, 0.25fr);
   grid-auto-columns: 1fr;
   justify-content: space-between;
   align-items: stretch;
@@ -141,30 +141,30 @@ blockquote {
   min-width: 10rem;
   text-align: center;
   background-color: #fafafa;
-  border-radius: .3rem;
+  border-radius: 0.3rem;
   margin-top: 0;
   margin-bottom: 0;
-  padding: .5rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   font-size: 1rem;
   line-height: 1.5rem;
-  transition: transform .4s, background-color .2s;
+  transition: transform 0.4s, background-color 0.2s;
 }
 
 .button:hover {
-  color: rgba(0, 0, 0, .7);
+  color: rgba(0, 0, 0, 0.7);
   background-color: #e7e7e7;
   transform: translate(-4px);
 }
 
 .button.border {
   color: #000;
-  border: .125rem solid #e6e6e6;
+  border: 0.125rem solid #e6e6e6;
 }
 
 .button.border.navbutton {
   min-width: 0;
   color: #000;
-  transition: transform .2s, background-color .2s;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .button.border.navbutton:hover {
@@ -187,8 +187,8 @@ blockquote {
 
 .icon-s.solid.navbutton {
   color: #c2a66d;
-  margin-left: .3rem;
-  transition: text-shadow .4s;
+  margin-left: 0.3rem;
+  transition: text-shadow 0.4s;
 }
 
 .icon-s.solid.navbutton:hover {
@@ -204,8 +204,8 @@ blockquote {
 }
 
 .some-wrapper {
-  grid-column-gap: .3rem;
-  grid-row-gap: .3rem;
+  grid-column-gap: 0.3rem;
+  grid-row-gap: 0.3rem;
   grid-template-rows: auto;
   grid-template-columns: auto;
   grid-auto-columns: auto;
@@ -213,12 +213,12 @@ blockquote {
   justify-content: start;
   align-items: center;
   justify-items: start;
-  transition: all .2s;
+  transition: all 0.2s;
   display: grid;
 }
 
 .some-wrapper:hover {
-  grid-column-gap: .7rem;
+  grid-column-gap: 0.7rem;
 }
 
 .text-s {
@@ -250,12 +250,12 @@ blockquote {
 .navbar-logo {
   width: 86%;
   align-items: center;
-  transition: margin .2s;
+  transition: margin 0.2s;
   display: flex;
 }
 
 .navbar-logo:hover {
-  margin-left: .5rem;
+  margin-left: 0.5rem;
 }
 
 .navbar-sandwich {
@@ -275,8 +275,9 @@ blockquote {
 .content {
   grid-column-gap: 1rem;
   grid-row-gap: 1rem;
-  grid-template: "."
-  / 1fr 1fr;
+  grid-template:
+    "."
+    / 1fr 1fr;
   grid-auto-columns: 1fr;
   grid-auto-flow: row;
   align-content: stretch;
@@ -290,7 +291,11 @@ blockquote {
 }
 
 .content.footer {
-  background-image: linear-gradient(rgba(66, 62, 60, .93), rgba(66, 62, 60, .93)), url('../images/pexels-iva-mu.jpg');
+  background-image: linear-gradient(
+      rgba(66, 62, 60, 0.93),
+      rgba(66, 62, 60, 0.93)
+    ),
+    url("../images/pexels-iva-mu.jpg");
   background-position: 0 0, 0 0;
   background-size: auto, cover;
   grid-template-columns: 1fr 1fr 1fr;
@@ -304,7 +309,7 @@ blockquote {
 
 .content.navbar {
   z-index: 1;
-  grid-template-columns: .25fr 1fr;
+  grid-template-columns: 0.25fr 1fr;
   margin-top: 0;
   margin-bottom: 1rem;
   padding-top: 1rem;
@@ -317,7 +322,7 @@ blockquote {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: transform .4s;
+  transition: transform 0.4s;
 }
 
 .footer-logo:hover {
@@ -328,7 +333,7 @@ blockquote {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform .4s;
+  transition: transform 0.4s;
 }
 
 .image:hover {
@@ -342,7 +347,7 @@ blockquote {
 .navlink {
   align-items: center;
   text-decoration: none;
-  transition: transform .2s;
+  transition: transform 0.2s;
   display: flex;
 }
 
@@ -368,7 +373,7 @@ blockquote {
 .footer-line {
   width: 63%;
   height: 2px;
-  background-color: rgba(255, 255, 255, .29);
+  background-color: rgba(255, 255, 255, 0.29);
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
@@ -386,13 +391,13 @@ blockquote {
 .footer-blob {
   opacity: 0;
   cursor: default;
-  background-color: rgba(0, 0, 0, .5);
-  border-radius: .3rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 0.3rem;
   margin-left: -3rem;
-  padding: .3rem .8rem;
-  font-size: .9rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
   line-height: 1.2rem;
-  transition: margin-left .2s, opacity .2s;
+  transition: margin-left 0.2s, opacity 0.2s;
   position: absolute;
   top: auto;
   bottom: 1.8rem;
@@ -447,12 +452,12 @@ blockquote {
 
 .footerlink {
   color: #989898;
-  margin-bottom: .7rem;
+  margin-bottom: 0.7rem;
   text-decoration: none;
 }
 
 .footerlink:hover {
-  color: rgba(185, 185, 185, .93);
+  color: rgba(185, 185, 185, 0.93);
 }
 
 .simple-cms-wrapper {
@@ -488,7 +493,7 @@ blockquote {
   max-width: 50rem;
   min-height: 100px;
   flex: 1;
-  margin-top: .5rem;
+  margin-top: 0.5rem;
 }
 
 .cms-item {
@@ -496,30 +501,31 @@ blockquote {
   min-height: 5rem;
   grid-column-gap: 1rem;
   grid-row-gap: 1rem;
-  background-color: rgba(46, 29, 20, .36);
+  cursor: pointer;
+  background-color: rgba(46, 29, 20, 0.36);
   grid-template-rows: auto;
   grid-template-columns: auto auto;
   grid-auto-columns: auto;
   margin-bottom: 1rem;
   padding: 1.5rem 1rem;
   display: grid;
-  box-shadow: 3px 4px 12px rgba(0, 0, 0, .22);
+  box-shadow: 3px 4px 12px rgba(0, 0, 0, 0.22);
 }
 
 .cms-input {
   width: 100%;
   color: #fff;
-  background-color: rgba(248, 224, 210, .16);
+  background-color: rgba(248, 224, 210, 0.16);
   margin-bottom: 0;
-  padding: .5rem;
+  padding: 0.5rem;
 }
 
 .cms-input::-ms-input-placeholder {
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .cms-input::placeholder {
-  color: rgba(255, 255, 255, .5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .cms-input.message {
@@ -532,8 +538,8 @@ blockquote {
   grid-template-rows: auto;
   grid-template-columns: auto minmax(auto, 1fr);
   grid-auto-columns: auto;
-  padding-bottom: .7rem;
-  display: none;
+  padding-bottom: 0.7rem;
+  display: grid;
 }
 
 .arrow-down-white {
@@ -543,15 +549,16 @@ blockquote {
 
 .cms-item-line {
   height: 1px;
-  background-color: rgba(255, 255, 255, .2);
+  background-color: rgba(255, 255, 255, 0.2);
   margin-bottom: 1rem;
 }
 
 .cms-close-button {
   width: 1.9rem;
   height: 2rem;
+  cursor: pointer;
   background-color: #f67c64;
-  padding: .18rem .3rem .2rem;
+  padding: 0.18rem 0.3rem 0.2rem;
   position: absolute;
   top: 1rem;
   bottom: auto;
@@ -563,6 +570,10 @@ blockquote {
   width: 100%;
   justify-content: center;
   display: flex;
+}
+
+.collection-text {
+  cursor: pointer;
 }
 
 @media screen and (max-width: 991px) {
@@ -592,10 +603,10 @@ blockquote {
 
   .navbar-links {
     z-index: 1;
-    grid-column-gap: .5rem;
+    grid-column-gap: 0.5rem;
     grid-row-gap: 1rem;
     background-color: #444442;
-    border-radius: .2rem;
+    border-radius: 0.2rem;
     grid-template-rows: auto;
     grid-template-columns: max-content;
     grid-auto-columns: max-content;
@@ -608,7 +619,7 @@ blockquote {
     top: 4.7rem;
     bottom: auto;
     left: auto;
-    right: .7rem;
+    right: 0.7rem;
   }
 
   .navbar-logo {
@@ -626,13 +637,13 @@ blockquote {
 
   .content.navbar {
     z-index: 100;
-    grid-template-columns: .5fr 1fr;
+    grid-template-columns: 0.5fr 1fr;
     margin-bottom: 1.5rem;
     padding-top: 1.5rem;
   }
 
   .navbar-arrow {
-    border: .7rem solid rgba(0, 0, 0, 0);
+    border: 0.7rem solid rgba(0, 0, 0, 0);
     border-top-width: 0;
     border-bottom: 1rem solid #444442;
     padding-bottom: 0;
@@ -709,15 +720,15 @@ blockquote {
   }
 
   label {
-    font-size: .9rem;
-    line-height: .9rem;
+    font-size: 0.9rem;
+    line-height: 0.9rem;
   }
 
   .button {
     min-width: 8rem;
     padding-left: 1rem;
     padding-right: 1rem;
-    font-size: .9rem;
+    font-size: 0.9rem;
     line-height: 1.2rem;
   }
 
@@ -738,7 +749,7 @@ blockquote {
     top: 4rem;
     bottom: auto;
     left: auto;
-    right: .6rem;
+    right: 0.6rem;
   }
 
   .navbar-logo {
@@ -777,7 +788,7 @@ blockquote {
   }
 
   .footerlink {
-    margin-bottom: .5rem;
+    margin-bottom: 0.5rem;
   }
 }
 
@@ -808,10 +819,10 @@ blockquote {
   }
 
   .navbar-links {
-    grid-column-gap: .25rem;
+    grid-column-gap: 0.25rem;
     grid-row-gap: 1rem;
     top: 3.9rem;
-    right: .4rem;
+    right: 0.4rem;
   }
 
   .navbar-sandwich {
@@ -856,8 +867,8 @@ blockquote {
   }
 
   .cms-inputs {
-    grid-column-gap: .5rem;
-    grid-row-gap: .5rem;
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
     grid-template-columns: auto;
   }
 }
@@ -872,7 +883,8 @@ blockquote {
   justify-self: end;
 }
 
-#w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5, #w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5 {
+#w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5,
+#w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5 {
   grid-area: span 1 / span 2 / span 1 / span 2;
 }
 
@@ -885,5 +897,3 @@ blockquote {
     grid-column: span 1 / span 1;
   }
 }
-
-
