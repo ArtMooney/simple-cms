@@ -3,25 +3,20 @@
     <h1>{{ simple }} CMS</h1>
     <div>by FrameCore</div>
     <div class="collection-wrapper">
-      <div class="collection-text">Kollektion1</div>
-      <div class="collection-text">Kollektion2</div>
+      <div v-for="table of schema" class="collection-text">
+        {{ table.name }}
+      </div>
     </div>
     <div class="text-s">Add, edit or remove content below</div>
     <div class="form-block w-form">
-      <form
-        id="email-form"
-        name="email-form"
-        data-name="Email Form"
-        method="get"
-        class="cms-item-wrapper"
-      >
+      <div class="cms-item-wrapper">
         <div
           v-for="(item, index) of items"
           @click="handleClick(index)"
           class="cms-item"
         >
           <div id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5">
-            Titel
+            {{ item.titel }}
           </div>
           <div
             id="w-node-_9b7e1cbf-3ced-61f8-24e8-1f5c039f38d8-d10df2f5"
@@ -44,18 +39,25 @@
               id="w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5"
               class="cms-item-line"
             ></div>
-            <div class="text-s">Titel:</div>
-            <input
-              type="email"
-              class="cms-input w-input"
-              maxlength="256"
-              name="email-2"
-              data-name="Email 2"
-              placeholder=""
-              id="email-2"
-              required=""
-            />
-            <div class="text-s">Datum:</div>
+
+            <template v-for="input of schema[0].fields">
+              <div class="text-s">
+                {{ input.name }}
+              </div>
+              <input
+                v-model="item.titel"
+                type="email"
+                class="cms-input w-input"
+                maxlength="256"
+                name="email-2"
+                data-name="Email 2"
+                placeholder=""
+                id="email-2"
+                required=""
+              />
+            </template>
+
+            <!-- <div class="text-s">Datum:</div>
             <input
               type="email"
               class="cms-input w-input"
@@ -107,15 +109,9 @@
               name="field"
               data-name="Field"
               class="cms-input message w-node-_8699eab2-e2be-b7dc-8ee4-34fc01ef4bd0-d10df2f5 w-input"
-            ></textarea>
+            ></textarea> -->
           </div>
         </div>
-      </form>
-      <div class="w-form-done">
-        <div>Thank you! Your submission has been received!</div>
-      </div>
-      <div class="w-form-fail">
-        <div>Oops! Something went wrong while submitting the form.</div>
       </div>
     </div>
     <div class="cms-close-button w-embed">
@@ -136,17 +132,20 @@ export default {
 
   data() {
     return {
+      schema: {},
       items: {},
       userName: "FrameCore",
       userPass: "CMS-development",
+      cmsGetBaseSchema: "https://api.framecore.se/webhook/get-base-schema",
       cmsGetWebhook: "https://api.framecore.se/webhook/simple-cms-get",
-      simple: "simple",
+      simple: "{{ simple }}",
       showItem: false,
     };
   },
 
-  created() {
-    this.getCmsData();
+  async created() {
+    this.schema = await this.getCmsData(this.cmsGetBaseSchema);
+    this.items = await this.getCmsData(this.cmsGetWebhook);
   },
 
   methods: {
@@ -158,25 +157,30 @@ export default {
       }
     },
 
-    getCmsData() {
-      var requestOptions = {
-        method: "GET",
-        headers: {
-          Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
-        },
-        redirect: "follow",
-      };
+    getCmsData(urlEndpoint) {
+      return new Promise((resolve, reject) => {
+        var requestOptions = {
+          method: "GET",
+          headers: {
+            Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
+          },
+          redirect: "follow",
+        };
 
-      fetch(this.cmsGetWebhook, requestOptions)
-        .then((response) => {
-          if (!response.ok) throw new Error();
-          return response.json();
-        })
-        .then((result) => {
-          console.log(result);
-          this.items = result;
-        })
-        .catch((error) => console.log(error));
+        fetch(urlEndpoint, requestOptions)
+          .then((response) => {
+            if (!response.ok) throw new Error();
+            return response.json();
+          })
+          .then((result) => {
+            console.log(result);
+            resolve(result);
+          })
+          .catch((error) => {
+            console.log(error);
+            reject(error);
+          });
+      });
     },
 
     getCookie(name) {
