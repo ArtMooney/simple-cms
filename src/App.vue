@@ -18,18 +18,35 @@
           <div id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5">
             {{ item.titel }}
           </div>
+
           <div
-            id="w-node-_9b7e1cbf-3ced-61f8-24e8-1f5c039f38d8-d10df2f5"
-            class="arrow-down-white w-embed"
+            id="w-node-_363c6eb4-ad8c-d7ce-141b-573850873513-d10df2f5"
+            class="item-control-wrapper"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-              <!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. -->
-              <path
-                fill="CurrentColor"
-                d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-              />
-            </svg>
+            <div
+              v-if="showItem === index && saveFlag"
+              class="text-s save-button"
+            >
+              Save
+            </div>
+            <div
+              id="w-node-_9b7e1cbf-3ced-61f8-24e8-1f5c039f38d8-d10df2f5"
+              :class="[
+                showItem === index
+                  ? 'arrow-down-white rotated w-embed'
+                  : 'arrow-down-white w-embed',
+              ]"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. -->
+                <path
+                  fill="CurrentColor"
+                  d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+                />
+              </svg>
+            </div>
           </div>
+
           <div
             id="w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5"
             class="cms-inputs"
@@ -45,71 +62,14 @@
                 {{ input.name }}
               </div>
               <input
-                v-model="item.titel"
-                type="email"
+                @click="handleInput"
+                v-model="item[input.name]"
+                :type="setCorrectType(input.type)"
                 class="cms-input w-input"
-                maxlength="256"
-                name="email-2"
-                data-name="Email 2"
-                placeholder=""
-                id="email-2"
+                :name="input.name"
                 required=""
               />
             </template>
-
-            <!-- <div class="text-s">Datum:</div>
-            <input
-              type="email"
-              class="cms-input w-input"
-              maxlength="256"
-              name="email"
-              data-name="Email"
-              placeholder=""
-              id="email"
-              required=""
-            />
-            <div class="text-s">Lokal:</div>
-            <input
-              type="email"
-              class="cms-input w-input"
-              maxlength="256"
-              name="email-2"
-              data-name="Email 2"
-              placeholder=""
-              id="email-2"
-              required=""
-            />
-            <div class="text-s">Org:</div>
-            <input
-              type="email"
-              class="cms-input w-input"
-              maxlength="256"
-              name="email-2"
-              data-name="Email 2"
-              placeholder=""
-              id="email-2"
-              required=""
-            />
-            <div class="text-s">Tid:<br /></div>
-            <input
-              type="email"
-              class="cms-input w-input"
-              maxlength="256"
-              name="email-2"
-              data-name="Email 2"
-              placeholder=""
-              id="email-2"
-              required=""
-            />
-            <div class="text-s">Övrig info:<br /></div>
-            <textarea
-              placeholder=""
-              maxlength="5000"
-              id="field"
-              name="field"
-              data-name="Field"
-              class="cms-input message w-node-_8699eab2-e2be-b7dc-8ee4-34fc01ef4bd0-d10df2f5 w-input"
-            ></textarea> -->
           </div>
         </div>
       </div>
@@ -140,6 +100,9 @@ export default {
       cmsGetWebhook: "https://api.framecore.se/webhook/simple-cms-get",
       simple: "{{ simple }}",
       showItem: false,
+      saveFlag: false,
+      currentItemSave: null,
+      currentIndex: false,
     };
   },
 
@@ -150,11 +113,33 @@ export default {
 
   methods: {
     handleClick(index) {
-      if (this.showItem === index) {
-        this.showItem = false;
+      this.showItem = this.showItem === index ? false : index;
+
+      if (index !== this.currentIndex) {
+        console.log("CHANGED ITEM");
       } else {
-        this.showItem = index;
+        console.log("SAME ITEM");
       }
+
+      this.currentIndex = index;
+
+      console.log("MONITOR", this.isItemValuesSame(index));
+    },
+
+    isItemValuesSame(index) {
+      if (!this.currentItemSave) return null;
+
+      const orgItems = JSON.parse(JSON.stringify(this.items));
+      const currentInputs = this.currentItemSave.querySelectorAll("input");
+
+      for (const input of currentInputs) {
+      }
+
+      for (const input of Object.values(orgItems[index])) {
+        console.log("INPUT", input);
+      }
+
+      return "RESULT";
     },
 
     getCmsData(urlEndpoint) {
@@ -183,13 +168,40 @@ export default {
       });
     },
 
-    getCookie(name) {
-      var value = "; " + document.cookie;
-      var parts = value.split("; " + name + "=");
-      if (parts.length === 2) {
-        return parts.pop().split(";").shift();
-      }
+    handleInput(event) {
+      this.showItem = true;
+      this.currentItemSave = event.target.parentElement;
+
+      // const monitorInput = event.target.addEventListener("input", () => {
+      //   console.log("MONITOR", this.isItemValuesSame(event));
+      // });
+
+      // const orgValue = event.target.value;
+
+      // const monitorInput = event.target.addEventListener("input", () => {
+      //   if (event.target.value !== orgValue) {
+      //     this.saveFlag = true;
+      //   } else {
+      //     this.saveFlag = false;
+      //   }
+      // });
     },
+
+    setCorrectType(type) {
+      let inputType = "text";
+
+      if (type === "multilineText") {
+        inputType = "textarea";
+      } else if (type === "datum") {
+        inputType = "date";
+      }
+
+      return inputType;
+    },
+  },
+
+  beforeDestroy() {
+    // window.removeEventListener("resize", this.handleResize);
   },
 };
 </script>
