@@ -227,10 +227,16 @@ blockquote {
 }
 
 .text-s.save-button {
+  background-color: #a73535;
   border: 2px solid #fff;
   margin-left: 1rem;
   margin-right: 1rem;
-  padding: 0.3rem 0.5rem;
+  padding: 0.1rem 0.5rem;
+  pointer-events: auto;
+}
+
+.text-s.save-button:hover {
+  background-color: #d55252;
 }
 
 .spacer-s {
@@ -601,6 +607,7 @@ blockquote {
   justify-content: center;
   align-items: center;
   display: flex;
+  pointer-events: none;
 }
 
 @media screen and (max-width: 991px) {
