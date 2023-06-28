@@ -29,26 +29,27 @@
             <div
               v-if="showItem === index && saveFlag"
               @click="saveItem(index)"
-              class="text-s save-button"
+              class="text-s control-buttons"
             >
               Save
             </div>
             <div
-              id="w-node-_9b7e1cbf-3ced-61f8-24e8-1f5c039f38d8-d10df2f5"
+              v-if="showItem === index && saveFlag"
+              @click="cancelItem(index)"
+              class="text-s control-buttons"
+            >
+              Cancel
+            </div>
+            <img
+              src="./images/chevron-down.svg"
               :class="[
                 showItem === index
                   ? 'arrow-down-white rotated w-embed'
                   : 'arrow-down-white w-embed',
               ]"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-                <!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. -->
-                <path
-                  fill="CurrentColor"
-                  d="M201.4 342.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 274.7 86.6 137.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-                />
-              </svg>
-            </div>
+              id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
+              alt=""
+            />
           </div>
 
           <div
@@ -78,15 +79,7 @@
         </div>
       </div>
     </div>
-    <div class="cms-close-button w-embed">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-        <!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. -->
-        <path
-          fill="CurrentColor"
-          d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"
-        />
-      </svg>
-    </div>
+    <img src="./images/xmark.svg" alt="" class="cms-close-button" />
   </div>
 </template>
 
@@ -185,10 +178,12 @@ export default {
 
       this.showItem = this.showItem === index ? false : index;
 
-      if (index !== this.currentIndex) {
-        this.currentItemSave = event.srcElement;
-        this.storedItemSave = this.currentItemSave.cloneNode(true);
-      }
+      // console.log("HÄST", index !== this.currentIndex);
+
+      // if (index !== this.currentIndex) {
+      this.currentItemSave = event.srcElement;
+      this.storedItemSave = this.currentItemSave.cloneNode(true);
+      // }
 
       this.currentIndex = index;
     },
@@ -196,6 +191,7 @@ export default {
     handleInput(event) {
       this.showItem = true;
 
+      console.log("HÄST");
       const currentItems = this.currentItemSave.querySelectorAll("input");
       const storedItems = this.storedItemSave.querySelectorAll("input");
       this.currentItems = currentItems;
@@ -253,12 +249,21 @@ export default {
       console.log(this.getItemJson(index, this.currentItems, this.storedItems));
 
       this.saveFlag = false;
+      this.currentIndex = index;
       await this.postCmsData(
         this.cmsSetItemWebhook,
         this.getItemJson(index, this.currentItems, this.storedItems)
       );
       this.schema = await this.getCmsData(this.cmsGetBaseSchema);
       this.items = await this.getCmsData(this.cmsGetWebhook);
+      this.showItem = false;
+    },
+
+    async cancelItem() {
+      console.log("CANCEL");
+      this.schema = await this.getCmsData(this.cmsGetBaseSchema);
+      this.items = await this.getCmsData(this.cmsGetWebhook);
+      this.saveFlag = false;
       this.showItem = false;
     },
 
