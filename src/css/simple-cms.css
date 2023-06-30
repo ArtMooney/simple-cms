@@ -593,6 +593,17 @@ blockquote {
   cursor: pointer;
 }
 
+.collection-text:hover {
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to right, #ff6363, #b776e5 50%, #fff);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.collection-text.chosen {
+  border-bottom: 2px solid #fff;
+}
+
 .item-control-wrapper {
   grid-column-gap: 0.5rem;
   grid-row-gap: 0.5rem;

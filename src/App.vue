@@ -3,8 +3,17 @@
     <h1>{{ simple }} CMS</h1>
     <div>by FrameCore</div>
     <div v-show="initLoadedFlag" class="collection-wrapper">
-      <div v-for="(table, index) of schema" class="collection-text">
-        <div @click="schemaIndex = index">{{ table.name }}</div>
+      <div v-for="(table, index) of schema">
+        <div
+          @click="schemaIndex = index"
+          :class="[
+            schemaIndex === index
+              ? 'collection-text chosen'
+              : 'collection-text',
+          ]"
+        >
+          {{ table.name }}
+        </div>
       </div>
     </div>
     <div v-show="initLoadedFlag" class="text-s">
