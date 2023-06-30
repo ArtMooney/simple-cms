@@ -2,18 +2,29 @@
   <div class="simple-cms-wrapper">
     <h1>{{ simple }} CMS</h1>
     <div>by FrameCore</div>
-    <div class="collection-wrapper">
-      <div v-for="table of schema" class="collection-text">
-        {{ table.name }}
+    <div v-show="initLoadedFlag" class="collection-wrapper">
+      <div v-for="(table, index) of schema" class="collection-text">
+        <div @click="schemaIndex = index">{{ table.name }}</div>
       </div>
     </div>
-    <div class="text-s">Add, edit or remove content below</div>
+    <div v-show="initLoadedFlag" class="text-s">
+      Add, edit or remove content below
+    </div>
     <div class="form-block w-form">
       <div class="cms-item-wrapper">
+        <Vue3Lottie
+          :animationData="loaderAnim"
+          :height="200"
+          :width="200"
+          v-if="loadingFlag"
+        />
+
         <div
           v-for="(item, index) of localItems"
           @click="handleClick($event, index)"
           class="cms-item"
+          v-show="!loadingFlag"
+          :ref="'list-item-' + index"
         >
           <div
             id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
@@ -27,16 +38,38 @@
             class="item-control-wrapper"
           >
             <div
+              id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
+              class="loader-wrapper"
+              v-show="savingItemFlag && currentIndex === index"
+            >
+              <div class="loader-anim">
+                <Vue3Lottie
+                  :animationData="loaderAnim"
+                  :height="60"
+                  :width="60"
+                />
+              </div>
+            </div>
+
+            <div
               v-if="showItem === index && saveFlag"
               @click="saveItem(index)"
-              class="text-s control-buttons"
+              :class="[
+                blinkAnim === true
+                  ? 'text-s control-buttons blinking'
+                  : 'text-s control-buttons',
+              ]"
             >
               Save
             </div>
             <div
               v-if="showItem === index && saveFlag"
               @click="cancelItem(index)"
-              class="text-s control-buttons"
+              :class="[
+                blinkAnim === true
+                  ? 'text-s control-buttons blinking'
+                  : 'text-s control-buttons',
+              ]"
             >
               Cancel
             </div>
@@ -62,7 +95,7 @@
               class="cms-item-line"
             ></div>
 
-            <template v-for="input of schema[0].fields">
+            <template v-for="input of schema[schemaIndex].fields">
               <div class="text-s">
                 {{ input.name }}
               </div>
@@ -84,8 +117,12 @@
 </template>
 
 <script>
+import { Vue3Lottie } from "vue3-lottie";
+import loaderAnim from "./documents/77076-loading.json";
+
 export default {
   name: "App",
+  components: { Vue3Lottie },
 
   data() {
     return {
@@ -100,16 +137,26 @@ export default {
       simple: "{{ simple }}",
       showItem: false,
       saveFlag: false,
+      savingItemFlag: false,
       currentIndex: false,
+      schemaIndex: 0,
+      loaderAnim,
+      loadingFlag: true,
+      initLoadedFlag: false,
+      blinkAnim: false,
     };
   },
 
   async created() {
+    console.clear();
+
+    this.schemaIndex = 0;
+    this.schema = await this.getCmsData(this.cmsGetBaseSchema);
     this.loadData();
   },
 
   methods: {
-    getCmsData(urlEndpoint) {
+    getCmsData(urlEndpoint, options) {
       return new Promise((resolve, reject) => {
         var requestOptions = {
           method: "GET",
@@ -119,7 +166,7 @@ export default {
           redirect: "follow",
         };
 
-        fetch(urlEndpoint, requestOptions)
+        fetch(urlEndpoint + (options ? "?" + options : ""), requestOptions)
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -167,9 +214,16 @@ export default {
     },
 
     async loadData() {
-      this.schema = await this.getCmsData(this.cmsGetBaseSchema);
-      this.items = await this.getCmsData(this.cmsGetWebhook);
+      this.loadingFlag = true;
+
+      this.items = await this.getCmsData(
+        this.cmsGetWebhook,
+        "id=" + this.schema[this.schemaIndex].id
+      );
       this.localItems = JSON.parse(JSON.stringify(this.items));
+
+      this.loadingFlag = false;
+      this.initLoadedFlag = true;
     },
 
     jsonToFormData(object) {
@@ -179,7 +233,21 @@ export default {
     },
 
     handleClick(event, index) {
-      if (this.saveFlag && event.target.nodeName !== "INPUT") return;
+      if (this.saveFlag && event.target.nodeName !== "INPUT") {
+        this.$refs["list-item-" + this.showItem][0].scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+        this.blinkAnim = true;
+        setTimeout(() => {
+          this.blinkAnim = false;
+        }, 2000);
+
+        return;
+      }
+
+      event.target.scrollIntoView({ behavior: "smooth", block: "start" });
 
       this.showItem = this.showItem === index ? false : index;
       this.currentIndex = index;
@@ -211,17 +279,20 @@ export default {
       }
 
       itemJson.id = items[index].id;
+      itemJson.tableid = this.schema[this.schemaIndex].id;
 
       return itemJson;
     },
 
     async saveItem(index) {
+      this.savingItemFlag = true;
       this.saveFlag = false;
       await this.postCmsData(
         this.cmsSetItemWebhook,
         this.getItemJson(index, this.localItems, this.items)
       );
       this.items = JSON.parse(JSON.stringify(this.localItems));
+      this.savingItemFlag = false;
     },
 
     async cancelItem() {
@@ -259,6 +330,10 @@ export default {
           this.saveFlag = false;
         }
       },
+    },
+
+    schemaIndex() {
+      this.loadData();
     },
   },
 };
