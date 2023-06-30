@@ -571,11 +571,11 @@ blockquote {
 }
 
 .cms-close-button {
-  width: 2rem;
-  height: 2rem;
+  width: 1.8rem;
+  height: 1.8rem;
   cursor: pointer;
   background-color: #f67c64;
-  padding: 0.18rem 0.3rem 0.2rem;
+  padding: 0.1rem;
   position: absolute;
   top: 1rem;
   bottom: auto;
@@ -913,8 +913,8 @@ blockquote {
   justify-self: end;
 }
 
-#w-node-_9b7e1cbf-3ced-61f8-24e8-1f5c039f38d8-d10df2f5 {
-  justify-self: end;
+#w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5 {
+  grid-area: span 1 / span 1 / span 1 / span 1;
 }
 
 #w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5,

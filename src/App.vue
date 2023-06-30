@@ -11,7 +11,7 @@
     <div class="form-block w-form">
       <div class="cms-item-wrapper">
         <div
-          v-for="(item, index) of items"
+          v-for="(item, index) of localItems"
           @click="handleClick($event, index)"
           class="cms-item"
         >
@@ -89,8 +89,9 @@ export default {
 
   data() {
     return {
-      schema: {},
-      items: {},
+      schema: [],
+      items: [],
+      localItems: [],
       userName: "FrameCore",
       userPass: "CMS-development",
       cmsGetBaseSchema: "https://api.framecore.se/webhook/get-base-schema",
@@ -99,18 +100,12 @@ export default {
       simple: "{{ simple }}",
       showItem: false,
       saveFlag: false,
-      currentItemSave: null,
-      storedItemSave: null,
       currentIndex: false,
-      currentItems: null,
-      storedItems: null,
-      inputPointer: null,
     };
   },
 
   async created() {
-    this.schema = await this.getCmsData(this.cmsGetBaseSchema);
-    this.items = await this.getCmsData(this.cmsGetWebhook);
+    this.loadData();
   },
 
   methods: {
@@ -162,9 +157,19 @@ export default {
           })
           .catch((error) => {
             console.log(error);
+
+            // must set some kind of error message here as well
+            this.loadData();
+
             reject(error);
           });
       });
+    },
+
+    async loadData() {
+      this.schema = await this.getCmsData(this.cmsGetBaseSchema);
+      this.items = await this.getCmsData(this.cmsGetWebhook);
+      this.localItems = JSON.parse(JSON.stringify(this.items));
     },
 
     jsonToFormData(object) {
@@ -177,94 +182,51 @@ export default {
       if (this.saveFlag && event.target.nodeName !== "INPUT") return;
 
       this.showItem = this.showItem === index ? false : index;
-
-      // console.log("HÄST", index !== this.currentIndex);
-
-      // if (index !== this.currentIndex) {
-      this.currentItemSave = event.srcElement;
-      this.storedItemSave = this.currentItemSave.cloneNode(true);
-      // }
-
       this.currentIndex = index;
     },
 
     handleInput(event) {
       this.showItem = true;
-
-      console.log("HÄST");
-      const currentItems = this.currentItemSave.querySelectorAll("input");
-      const storedItems = this.storedItemSave.querySelectorAll("input");
-      this.currentItems = currentItems;
-      this.storedItems = storedItems;
-      this.inputPointer = event.target;
-
-      this.inputPointer.addEventListener("input", this.inputMonitor);
-      this.inputPointer.addEventListener("blur", this.stopMonitor);
     },
 
-    inputMonitor() {
-      const currentItems = this.currentItems;
-      const storedItems = this.storedItems;
-
-      if (this.isItemValuesChanged(currentItems, storedItems)) {
-        this.saveFlag = true;
-      } else {
-        this.saveFlag = false;
-      }
-    },
-
-    stopMonitor() {
-      this.inputPointer.addEventListener("input", this.inputMonitor);
-      this.inputPointer.addEventListener("blur", this.stopMonitor);
-    },
-
-    isItemValuesChanged(currentItems, storedItems) {
-      if (!currentItems && !storedItems) return null;
+    isItemChanged(localItems, items) {
+      if (!items && !localItems) return null;
 
       let modified = false;
 
-      for (const [index, currentInput] of Object.entries(currentItems)) {
-        if (currentInput.value !== storedItems[index].value) modified = true;
+      for (const [index, input] of Object.entries(localItems.fields)) {
+        if (input !== items.fields[index]) modified = true;
       }
 
       return modified;
     },
 
-    getItemJson(itemIndex, currentItems, storedItems) {
-      if (!currentItems && !storedItems) return null;
+    getItemJson(index, localItems, items) {
+      if (!localItems && !items) return null;
 
       let itemJson = {};
 
-      for (const [index, currentInput] of Object.entries(currentItems)) {
-        itemJson[this.schema[0].fields[index].name] = currentInput.value;
+      for (const [name, input] of Object.entries(localItems[index].fields)) {
+        itemJson[name] = input;
       }
 
-      itemJson.id = this.items[itemIndex].id;
+      itemJson.id = items[index].id;
 
       return itemJson;
     },
 
     async saveItem(index) {
-      console.log("SAVE", index);
-      console.log(this.getItemJson(index, this.currentItems, this.storedItems));
-
       this.saveFlag = false;
-      this.currentIndex = index;
       await this.postCmsData(
         this.cmsSetItemWebhook,
-        this.getItemJson(index, this.currentItems, this.storedItems)
+        this.getItemJson(index, this.localItems, this.items)
       );
-      this.schema = await this.getCmsData(this.cmsGetBaseSchema);
-      this.items = await this.getCmsData(this.cmsGetWebhook);
-      this.showItem = false;
+      this.items = JSON.parse(JSON.stringify(this.localItems));
     },
 
     async cancelItem() {
-      console.log("CANCEL");
-      this.schema = await this.getCmsData(this.cmsGetBaseSchema);
-      this.items = await this.getCmsData(this.cmsGetWebhook);
       this.saveFlag = false;
-      this.showItem = false;
+      this.localItems = JSON.parse(JSON.stringify(this.items));
     },
 
     setCorrectType(type) {
@@ -277,6 +239,26 @@ export default {
       }
 
       return inputType;
+    },
+  },
+
+  watch: {
+    localItems: {
+      deep: true,
+      handler(allInputs) {
+        if (this.currentIndex === false) return;
+
+        if (
+          this.isItemChanged(
+            allInputs[this.currentIndex],
+            this.items[this.currentIndex]
+          )
+        ) {
+          this.saveFlag = true;
+        } else {
+          this.saveFlag = false;
+        }
+      },
     },
   },
 };
