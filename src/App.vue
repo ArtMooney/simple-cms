@@ -28,97 +28,115 @@
           v-if="loadingFlag"
         />
 
-        <div
-          v-for="(item, index) of localItems"
-          @click="handleClick($event, index)"
-          class="cms-item"
-          v-show="!loadingFlag"
-          :ref="'list-item-' + index"
+        <drop-list
+          :items="localItems"
+          class="cms-items"
+          @reorder="
+            $event.apply(localItems);
+            saveAllItems();
+          "
         >
-          <div
-            id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
-            style="pointer-events: none"
-          >
-            {{ item.fields.titel }}
-          </div>
-
-          <div
-            id="w-node-_363c6eb4-ad8c-d7ce-141b-573850873513-d10df2f5"
-            class="item-control-wrapper"
-          >
-            <div
-              id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
-              class="loader-wrapper"
-              v-show="savingItemFlag && currentIndex === index"
+          <template v-slot:item="{ item, index }">
+            <drag
+              :delay="dragDelay"
+              :vibration="dragVibration"
+              @click.prevent="handleClick($event, index)"
+              class="cms-item"
+              v-show="!loadingFlag"
+              :id="'list-item-' + index"
+              :key="item"
             >
-              <div class="loader-anim">
-                <Vue3Lottie
-                  :animationData="loaderAnim"
-                  :height="60"
-                  :width="60"
+              <div
+                id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
+                style="pointer-events: none"
+              >
+                {{ item.fields.titel }}
+              </div>
+
+              <div
+                id="w-node-_363c6eb4-ad8c-d7ce-141b-573850873513-d10df2f5"
+                class="item-control-wrapper"
+              >
+                <div
+                  id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
+                  class="loader-wrapper"
+                  v-show="
+                    (savingItemFlag && currentIndex === index) ||
+                    savingAllItemsFlag
+                  "
+                >
+                  <div class="loader-anim">
+                    <Vue3Lottie
+                      :animationData="loaderAnim"
+                      :height="60"
+                      :width="60"
+                    />
+                  </div>
+                </div>
+
+                <div
+                  v-if="showItem === index && saveFlag"
+                  @click="saveItem(index)"
+                  :class="[
+                    blinkAnim === true
+                      ? 'text-s control-buttons blinking'
+                      : 'text-s control-buttons',
+                  ]"
+                >
+                  Save
+                </div>
+                <div
+                  v-if="showItem === index && saveFlag"
+                  @click="cancelItem(index)"
+                  :class="[
+                    blinkAnim === true
+                      ? 'text-s control-buttons blinking'
+                      : 'text-s control-buttons',
+                  ]"
+                >
+                  Cancel
+                </div>
+                <img
+                  src="./images/chevron-down.svg"
+                  :class="[
+                    showItem === index
+                      ? 'arrow-down-white rotated w-embed'
+                      : 'arrow-down-white w-embed',
+                  ]"
+                  id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
+                  alt=""
                 />
               </div>
-            </div>
 
-            <div
-              v-if="showItem === index && saveFlag"
-              @click="saveItem(index)"
-              :class="[
-                blinkAnim === true
-                  ? 'text-s control-buttons blinking'
-                  : 'text-s control-buttons',
-              ]"
-            >
-              Save
-            </div>
-            <div
-              v-if="showItem === index && saveFlag"
-              @click="cancelItem(index)"
-              :class="[
-                blinkAnim === true
-                  ? 'text-s control-buttons blinking'
-                  : 'text-s control-buttons',
-              ]"
-            >
-              Cancel
-            </div>
-            <img
-              src="./images/chevron-down.svg"
-              :class="[
-                showItem === index
-                  ? 'arrow-down-white rotated w-embed'
-                  : 'arrow-down-white w-embed',
-              ]"
-              id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
-              alt=""
-            />
-          </div>
+              <div
+                id="w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5"
+                class="cms-inputs"
+                v-show="showItem === index"
+              >
+                <div
+                  id="w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5"
+                  class="cms-item-line"
+                ></div>
 
-          <div
-            id="w-node-_7a854a61-d8eb-6699-c242-c06bb6827dc0-d10df2f5"
-            class="cms-inputs"
-            v-show="showItem === index"
-          >
-            <div
-              id="w-node-_8932dee4-4a00-e945-bd60-da5622cea0d4-d10df2f5"
-              class="cms-item-line"
-            ></div>
-
-            <template v-for="input of schema[schemaIndex].fields">
-              <div class="text-s">
-                {{ input.name }}
+                <template v-for="input of schema[schemaIndex].fields">
+                  <div v-if="input.name !== 'index'" class="text-s">
+                    {{ input.name }}
+                  </div>
+                  <input
+                    v-if="input.name !== 'index'"
+                    @click="handleInput"
+                    v-model="item.fields[input.name]"
+                    :type="setCorrectType(input.type)"
+                    class="cms-input w-input"
+                    :name="input.name"
+                    required=""
+                  />
+                </template>
               </div>
-              <input
-                @click="handleInput"
-                v-model="item.fields[input.name]"
-                :type="setCorrectType(input.type)"
-                class="cms-input w-input"
-                :name="input.name"
-                required=""
-              />
-            </template>
-          </div>
-        </div>
+            </drag>
+          </template>
+          <template v-slot:feedback="{ data }"> </template>
+        </drop-list>
       </div>
     </div>
     <img src="./images/xmark.svg" alt="" class="cms-close-button" />
@@ -128,10 +146,12 @@
 <script>
 import { Vue3Lottie } from "vue3-lottie";
 import loaderAnim from "./documents/77076-loading.json";
+import { Drag, DropList } from "vue-easy-dnd";
+import "vue-easy-dnd/dist/dnd.css";
 
 export default {
   name: "App",
-  components: { Vue3Lottie },
+  components: { Vue3Lottie, Drag, DropList },
 
   data() {
     return {
@@ -147,12 +167,15 @@ export default {
       showItem: false,
       saveFlag: false,
       savingItemFlag: false,
+      savingAllItemsFlag: false,
       currentIndex: false,
       schemaIndex: 0,
       loaderAnim,
       loadingFlag: true,
       initLoadedFlag: false,
       blinkAnim: false,
+      dragDelay: 10,
+      dragVibration: 100,
     };
   },
 
@@ -196,9 +219,11 @@ export default {
         var requestOptions = {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
           },
-          body: this.jsonToFormData(data),
+
+          body: JSON.stringify(data),
           redirect: "follow",
         };
 
@@ -235,15 +260,10 @@ export default {
       this.initLoadedFlag = true;
     },
 
-    jsonToFormData(object) {
-      const formData = new FormData();
-      Object.keys(object).forEach((key) => formData.append(key, object[key]));
-      return formData;
-    },
-
     handleClick(event, index) {
       if (this.saveFlag && event.target.nodeName !== "INPUT") {
-        this.$refs["list-item-" + this.showItem][0].scrollIntoView({
+        // this.$refs["list-item-" + this.showItem][0].scrollIntoView({
+        document.getElementById("list-item-" + this.showItem).scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
@@ -266,6 +286,18 @@ export default {
       this.showItem = true;
     },
 
+    setCorrectType(type) {
+      let inputType = "text";
+
+      if (type === "multilineText") {
+        inputType = "textarea";
+      } else if (type === "datum") {
+        inputType = "date";
+      }
+
+      return inputType;
+    },
+
     isItemChanged(localItems, items) {
       if (!items && !localItems) return null;
 
@@ -278,16 +310,10 @@ export default {
       return modified;
     },
 
-    getItemJson(index, localItems, items) {
-      if (!localItems && !items) return null;
-
+    getItemJson(index) {
       let itemJson = {};
-
-      for (const [name, input] of Object.entries(localItems[index].fields)) {
-        itemJson[name] = input;
-      }
-
-      itemJson.id = items[index].id;
+      itemJson = JSON.parse(JSON.stringify(this.localItems[index].fields));
+      itemJson.id = this.localItems[index].id;
       itemJson.tableid = this.schema[this.schemaIndex].id;
 
       return itemJson;
@@ -296,29 +322,31 @@ export default {
     async saveItem(index) {
       this.savingItemFlag = true;
       this.saveFlag = false;
-      await this.postCmsData(
-        this.cmsSetItemWebhook,
-        this.getItemJson(index, this.localItems, this.items)
-      );
+      await this.postCmsData(this.cmsSetItemWebhook, [this.getItemJson(index)]);
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingItemFlag = false;
+    },
+
+    async saveAllItems() {
+      const itemArray = [];
+      this.savingAllItemsFlag = true;
+      this.saveFlag = true;
+
+      for (const [index, item] of Object.entries(this.localItems)) {
+        item.fields.index = index;
+        itemArray.push(this.getItemJson(index));
+      }
+
+      // max 10 items per api call according to airtable but maybe test this at some point
+      await this.postCmsData(this.cmsSetItemWebhook, itemArray);
+      this.items = JSON.parse(JSON.stringify(this.localItems));
+      this.savingAllItemsFlag = false;
+      this.saveFlag = false;
     },
 
     async cancelItem() {
       this.saveFlag = false;
       this.localItems = JSON.parse(JSON.stringify(this.items));
-    },
-
-    setCorrectType(type) {
-      let inputType = "text";
-
-      if (type === "multilineText") {
-        inputType = "textarea";
-      } else if (type === "datum") {
-        inputType = "date";
-      }
-
-      return inputType;
     },
   },
 
@@ -343,6 +371,14 @@ export default {
 
     schemaIndex() {
       this.loadData();
+    },
+
+    showItem() {
+      if (this.showItem === false) {
+        this.dragDelay = 10;
+      } else {
+        this.dragDelay = 86400000;
+      }
     },
   },
 };

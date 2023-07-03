@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "vue": "^3.2.47",
+    "vue-easy-dnd": "^2.1.3",
     "vue3-lottie": "^3.0.0"
   },
   "devDependencies": {
