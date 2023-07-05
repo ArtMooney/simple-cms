@@ -19,7 +19,10 @@
     <div v-show="initLoadedFlag" class="text-s">
       Add, edit or remove content below
     </div>
-    <div class="form-block w-form">
+    <div class="cms-items-block">
+      <div class="text-s button-add-new">+ Add new item</div>
+    </div>
+    <div class="cms-items-block w-form">
       <div class="cms-item-wrapper">
         <Vue3Lottie
           :animationData="loaderAnim"
@@ -47,65 +50,134 @@
               :key="item"
             >
               <div
-                id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
-                style="pointer-events: none"
+                id="w-node-_5f4e042c-c275-1c4b-7191-70138bfa36f8-d10df2f5"
+                class="item-title-wrapper"
               >
-                {{ item.fields.titel }}
+                <div
+                  id="w-node-e97159e2-8ebc-f0c7-089d-ad3d67bfd80a-d10df2f5"
+                  class="item-title-wrapper"
+                >
+                  <img
+                    src="./images/grip-vertical.svg"
+                    id="w-node-_3152d18a-1e62-e7da-3fba-64d3117471a9-d10df2f5"
+                    alt=""
+                    class="dragdrop-handle"
+                  />
+                  <div
+                    id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
+                    style="pointer-events: none"
+                  >
+                    {{ item.fields.titel }}
+                  </div>
+                </div>
+                <div class="item-grid show4">
+                  <img
+                    src="./images/chevron-down.svg"
+                    id="w-node-ca2ac5e0-9092-1cea-f525-5ac925d9f1af-d10df2f5"
+                    alt=""
+                    :class="[
+                      showItem === index
+                        ? 'arrow-down-white rotated w-embed'
+                        : 'arrow-down-white w-embed',
+                    ]"
+                  />
+
+                  <div
+                    id="w-node-ca2ac5e0-9092-1cea-f525-5ac925d9f1b0-d10df2f5"
+                    class="loader-wrapper"
+                    v-show="
+                      (savingItemFlag && currentIndex === index) ||
+                      savingAllItemsFlag
+                    "
+                  >
+                    <div class="loader-anim">
+                      <Vue3Lottie
+                        :animationData="loaderAnim"
+                        :height="60"
+                        :width="60"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div
                 id="w-node-_363c6eb4-ad8c-d7ce-141b-573850873513-d10df2f5"
-                class="item-control-wrapper"
+                :class="[
+                  showItem === index
+                    ? 'item-control-wrapper'
+                    : 'item-control-wrapper hide4',
+                ]"
               >
                 <div
-                  id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
-                  class="loader-wrapper"
-                  v-show="
-                    (savingItemFlag && currentIndex === index) ||
-                    savingAllItemsFlag
-                  "
+                  id="w-node-_1d27ccc1-0f7f-00b3-b75f-85f2d1900c66-d10df2f5"
+                  class="item-grid"
                 >
-                  <div class="loader-anim">
-                    <Vue3Lottie
-                      :animationData="loaderAnim"
-                      :height="60"
-                      :width="60"
-                    />
+                  <div
+                    id="w-node-_0b476731-d8fb-2341-5ad4-24f0f7c9aac8-d10df2f5"
+                    v-if="showItem === index && saveFlag"
+                    @click="saveItem(index)"
+                    :class="[
+                      blinkAnim === true
+                        ? 'text-s button-controls blinking'
+                        : 'text-s button-controls',
+                    ]"
+                  >
+                    Save
+                  </div>
+                  <div
+                    id="w-node-b1b7d981-a5e9-7138-58d8-3d72cfc97804-d10df2f5"
+                    v-if="showItem === index && saveFlag"
+                    @click="cancelItem(index)"
+                    :class="[
+                      blinkAnim === true
+                        ? 'text-s button-controls blinking'
+                        : 'text-s button-controls',
+                    ]"
+                  >
+                    Cancel
+                  </div>
+                  <div
+                    id="w-node-_75f843bd-5bf3-9a52-8a05-85a2c9f5e6dc-d10df2f5"
+                    :class="[
+                      showItem === index
+                        ? 'text-s button-controls'
+                        : 'text-s button-controls hide4',
+                    ]"
+                  >
+                    Delete
                   </div>
                 </div>
-
                 <div
-                  v-if="showItem === index && saveFlag"
-                  @click="saveItem(index)"
-                  :class="[
-                    blinkAnim === true
-                      ? 'text-s control-buttons blinking'
-                      : 'text-s control-buttons',
-                  ]"
+                  id="w-node-_9213f67d-0cf0-9708-3dd0-d741737ab529-d10df2f5"
+                  class="item-grid hide4"
                 >
-                  Save
+                  <img
+                    src="./images/chevron-down.svg"
+                    :class="[
+                      showItem === index
+                        ? 'arrow-down-white rotated w-embed'
+                        : 'arrow-down-white w-embed',
+                    ]"
+                    id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
+                  />
+                  <div
+                    id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
+                    class="loader-wrapper"
+                    v-show="
+                      (savingItemFlag && currentIndex === index) ||
+                      savingAllItemsFlag
+                    "
+                  >
+                    <div class="loader-anim">
+                      <Vue3Lottie
+                        :animationData="loaderAnim"
+                        :height="60"
+                        :width="60"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div
-                  v-if="showItem === index && saveFlag"
-                  @click="cancelItem(index)"
-                  :class="[
-                    blinkAnim === true
-                      ? 'text-s control-buttons blinking'
-                      : 'text-s control-buttons',
-                  ]"
-                >
-                  Cancel
-                </div>
-                <img
-                  src="./images/chevron-down.svg"
-                  :class="[
-                    showItem === index
-                      ? 'arrow-down-white rotated w-embed'
-                      : 'arrow-down-white w-embed',
-                  ]"
-                  id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
-                  alt=""
-                />
               </div>
 
               <div
@@ -174,7 +246,7 @@ export default {
       loadingFlag: true,
       initLoadedFlag: false,
       blinkAnim: false,
-      dragDelay: 10,
+      dragDelay: 20,
       dragVibration: 100,
     };
   },
@@ -375,7 +447,7 @@ export default {
 
     showItem() {
       if (this.showItem === false) {
-        this.dragDelay = 10;
+        this.dragDelay = 20;
       } else {
         this.dragDelay = 86400000;
       }
@@ -383,3 +455,33 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.text-s.button-controls {
+  pointer-events: auto;
+}
+
+.item-control-wrapper {
+  pointer-events: none;
+}
+
+@keyframes blink {
+  0% {
+    background-color: #8a548b;
+  }
+  50% {
+    background-color: white;
+  }
+  100% {
+    background-color: #8a548b;
+  }
+}
+
+.blinking {
+  animation: blink 700ms 2;
+}
+
+.cms-item {
+  cursor: pointer;
+}
+</style>
