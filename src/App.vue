@@ -48,6 +48,7 @@
               v-show="!loadingFlag"
               :id="'list-item-' + index"
               :key="item"
+              handle=".dragdrop-handle"
             >
               <div
                 id="w-node-_5f4e042c-c275-1c4b-7191-70138bfa36f8-d10df2f5"
@@ -73,6 +74,11 @@
                 <div class="item-grid show4">
                   <img
                     src="./images/chevron-down.svg"
+                    v-if="
+                      (!savingItemFlag ||
+                        (savingItemFlag && currentIndex !== index)) &&
+                      !savingAllItemsFlag
+                    "
                     id="w-node-ca2ac5e0-9092-1cea-f525-5ac925d9f1af-d10df2f5"
                     alt=""
                     :class="[
@@ -154,6 +160,11 @@
                 >
                   <img
                     src="./images/chevron-down.svg"
+                    v-if="
+                      (!savingItemFlag ||
+                        (savingItemFlag && currentIndex !== index)) &&
+                      !savingAllItemsFlag
+                    "
                     :class="[
                       showItem === index
                         ? 'arrow-down-white rotated w-embed'
@@ -246,7 +257,7 @@ export default {
       loadingFlag: true,
       initLoadedFlag: false,
       blinkAnim: false,
-      dragDelay: 20,
+      dragDelay: 0,
       dragVibration: 100,
     };
   },
@@ -447,7 +458,7 @@ export default {
 
     showItem() {
       if (this.showItem === false) {
-        this.dragDelay = 20;
+        this.dragDelay = 0;
       } else {
         this.dragDelay = 86400000;
       }
