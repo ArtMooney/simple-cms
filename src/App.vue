@@ -150,6 +150,7 @@
                         ? 'text-s button-controls'
                         : 'text-s button-controls hide4',
                     ]"
+                    @click="deleteItem(index)"
                   >
                     Delete
                   </div>
@@ -359,9 +360,12 @@ export default {
         return;
       }
 
-      event.target.scrollIntoView({ behavior: "smooth", block: "start" });
+      // if delete is clicked, do not change showItem panel
+      if (event.target.innerText !== "Delete") {
+        event.target.scrollIntoView({ behavior: "smooth", block: "start" });
+        this.showItem = this.showItem === index ? false : index;
+      }
 
-      this.showItem = this.showItem === index ? false : index;
       this.currentIndex = index;
     },
 
@@ -405,7 +409,10 @@ export default {
     async saveItem(index) {
       this.savingItemFlag = true;
       this.saveFlag = false;
-      await this.postCmsData(this.cmsSetItemWebhook, [this.getItemJson(index)]);
+      await this.postCmsData(this.cmsSetItemWebhook, {
+        command: "update",
+        data: [this.getItemJson(index)],
+      });
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingItemFlag = false;
     },
@@ -421,7 +428,10 @@ export default {
       }
 
       // max 10 items per api call according to airtable but maybe test this at some point
-      await this.postCmsData(this.cmsSetItemWebhook, itemArray);
+      await this.postCmsData(this.cmsSetItemWebhook, {
+        command: "update",
+        data: itemArray,
+      });
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingAllItemsFlag = false;
       this.saveFlag = false;
@@ -430,6 +440,25 @@ export default {
     async cancelItem() {
       this.saveFlag = false;
       this.localItems = JSON.parse(JSON.stringify(this.items));
+    },
+
+    deleteItem(index) {
+      this.savingItemFlag = true;
+      this.saveFlag = false;
+
+      setTimeout(async () => {
+        this.showItem = false;
+
+        await this.postCmsData(this.cmsSetItemWebhook, {
+          command: "delete",
+          data: [this.getItemJson(index)],
+        });
+
+        this.localItems.splice(index, 1);
+
+        this.items = JSON.parse(JSON.stringify(this.localItems));
+        this.savingItemFlag = false;
+      }, 100);
     },
   },
 
