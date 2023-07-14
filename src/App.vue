@@ -19,8 +19,8 @@
     <div v-show="initLoadedFlag" class="text-s">
       Add, edit or remove content below
     </div>
-    <div class="cms-items-block">
-      <div class="text-s button-add-new">+ Add new item</div>
+    <div v-show="initLoadedFlag" class="cms-items-block">
+      <div @click="addItem()" class="text-s button-add-new">+ Add new item</div>
     </div>
     <div class="cms-items-block w-form">
       <div class="cms-item-wrapper">
@@ -46,7 +46,7 @@
               @click.prevent="handleClick($event, index)"
               class="cms-item"
               v-show="!loadingFlag"
-              :id="'list-item-' + index"
+              :ref="`list-item-${index}`"
               :key="item"
               handle=".dragdrop-handle"
             >
@@ -151,6 +151,7 @@
                         : 'text-s button-controls hide4',
                     ]"
                     @click="deleteItem(index)"
+                    v-show="currentIndex !== index || !editingNewItem"
                   >
                     Delete
                   </div>
@@ -260,6 +261,7 @@ export default {
       blinkAnim: false,
       dragDelay: 0,
       dragVibration: 100,
+      editingNewItem: false,
     };
   },
 
@@ -346,8 +348,9 @@ export default {
 
     handleClick(event, index) {
       if (this.saveFlag && event.target.nodeName !== "INPUT") {
-        // this.$refs["list-item-" + this.showItem][0].scrollIntoView({
-        document.getElementById("list-item-" + this.showItem).scrollIntoView({
+        const element = this.$refs["list-item-" + this.showItem].$el;
+
+        element.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
@@ -386,7 +389,7 @@ export default {
     },
 
     isItemChanged(localItems, items) {
-      if (!items && !localItems) return null;
+      if ((!items && !localItems) || this.editingNewItem) return null;
 
       let modified = false;
 
@@ -409,10 +412,22 @@ export default {
     async saveItem(index) {
       this.savingItemFlag = true;
       this.saveFlag = false;
-      await this.postCmsData(this.cmsSetItemWebhook, {
-        command: "update",
-        data: [this.getItemJson(index)],
-      });
+
+      if (this.editingNewItem) {
+        const savedItem = await this.postCmsData(this.cmsSetItemWebhook, {
+          command: "add",
+          data: [this.getItemJson(index)],
+        });
+
+        this.editingNewItem = false;
+        this.localItems[index] = savedItem[0];
+      } else {
+        await this.postCmsData(this.cmsSetItemWebhook, {
+          command: "update",
+          data: [this.getItemJson(index)],
+        });
+      }
+
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingItemFlag = false;
     },
@@ -460,13 +475,44 @@ export default {
         this.savingItemFlag = false;
       }, 100);
     },
+
+    addItem() {
+      this.editingNewItem = true;
+      const index = this.localItems.length;
+      this.currentIndex = index;
+      let fields = {};
+
+      for (const item of this.schema[0].fields) fields[item.name] = "";
+      fields.index = index;
+
+      this.localItems.push({
+        createdTime: new Date(),
+        fields,
+        id: "",
+      });
+
+      this.showItem = this.showItem === index ? false : index;
+
+      this.$nextTick(() => {
+        this.saveFlag = true;
+        const element = this.$refs["list-item-" + this.showItem].$el;
+        const inputs = element.querySelectorAll("input");
+
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+
+        inputs[0].focus();
+      });
+    },
   },
 
   watch: {
     localItems: {
       deep: true,
       handler(allInputs) {
-        if (this.currentIndex === false) return;
+        if (this.currentIndex === false || this.editingNewItem) return;
 
         if (
           this.isItemChanged(
