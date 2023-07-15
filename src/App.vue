@@ -1,6 +1,6 @@
 <template>
   <div class="simple-cms-wrapper">
-    <h1>{{ simple }} CMS</h1>
+    <h1 class="text-center">{{ cmsName }}</h1>
     <div>by FrameCore</div>
     <div v-show="initLoadedFlag" class="collection-wrapper">
       <div v-for="(table, index) of schema">
@@ -22,8 +22,17 @@
     <div v-show="initLoadedFlag" class="cms-items-block">
       <div @click="addItem()" class="text-s button-add-new">+ Add new item</div>
     </div>
+    <div
+      v-show="initLoadedFlag"
+      v-if="!localItems.length"
+      class="cms-items-block"
+    >
+      <div v-show="!loadingFlag" class="text-s list-message">
+        No items found
+      </div>
+    </div>
     <div class="cms-items-block w-form">
-      <div class="cms-item-wrapper">
+      <div v-if="!appError" class="cms-item-wrapper">
         <Vue3Lottie
           :animationData="loaderAnim"
           :height="200"
@@ -59,7 +68,7 @@
                   class="item-title-wrapper"
                 >
                   <img
-                    src="./images/grip-vertical.svg"
+                    :src="base64image(gripVertical)"
                     id="w-node-_3152d18a-1e62-e7da-3fba-64d3117471a9-d10df2f5"
                     alt=""
                     class="dragdrop-handle"
@@ -73,7 +82,7 @@
                 </div>
                 <div class="item-grid show4">
                   <img
-                    src="./images/chevron-down.svg"
+                    :src="base64image(chevronDown)"
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
@@ -161,7 +170,7 @@
                   class="item-grid hide4"
                 >
                   <img
-                    src="./images/chevron-down.svg"
+                    :src="base64image(chevronDown)"
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
@@ -223,8 +232,11 @@
           <template v-slot:feedback="{ data }"> </template>
         </drop-list>
       </div>
+      <div v-if="appError" class="error-message">
+        <div class="text-s text-black">Sorry, but something went wrong...</div>
+      </div>
     </div>
-    <img src="./images/xmark.svg" alt="" class="cms-close-button" />
+    <img :src="base64image(xMark)" alt="" class="cms-close-button" />
   </div>
 </template>
 
@@ -233,6 +245,9 @@ import { Vue3Lottie } from "vue3-lottie";
 import loaderAnim from "./documents/77076-loading.json";
 import { Drag, DropList } from "vue-easy-dnd";
 import "vue-easy-dnd/dist/dnd.css";
+import chevronDown from "./images/chevron-down.svg?raw";
+import gripVertical from "./images/grip-vertical.svg?raw";
+import xMark from "./images/xmark.svg?raw";
 
 export default {
   name: "App",
@@ -245,10 +260,10 @@ export default {
       localItems: [],
       userName: "FrameCore",
       userPass: "CMS-development",
-      cmsGetBaseSchema: "https://api.framecore.se/webhook/get-base-schema",
-      cmsGetWebhook: "https://api.framecore.se/webhook/simple-cms-get",
-      cmsSetItemWebhook: "https://api.framecore.se/webhook/simple-cms-set",
-      simple: "{{ simple }}",
+      cmsGetBaseSchema: "https://api.framecore.se/webhook/simple-cms/get-base",
+      cmsGetWebhook: "https://api.framecore.se/webhook/simple-cms/get-items",
+      cmsSetWebhook: "https://api.framecore.se/webhook/simple-cms/set",
+      cmsName: "{{ simple }} CMS",
       showItem: false,
       saveFlag: false,
       savingItemFlag: false,
@@ -262,6 +277,10 @@ export default {
       dragDelay: 0,
       dragVibration: 100,
       editingNewItem: false,
+      appError: false,
+      chevronDown: chevronDown,
+      gripVertical: gripVertical,
+      xMark: xMark,
     };
   },
 
@@ -290,11 +309,15 @@ export default {
             return response.json();
           })
           .then((result) => {
-            console.log(result);
+            // console.log(result);
             resolve(result);
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
+
+            this.loadingFlag = false;
+            this.initLoadedFlag = false;
+            this.appError = true;
             reject(error);
           });
       });
@@ -319,15 +342,14 @@ export default {
             return response.json();
           })
           .then((result) => {
-            console.log(result);
+            // console.log(result);
             resolve(result);
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
 
-            // must set some kind of error message here as well
             this.loadData();
-
+            this.appError = true;
             reject(error);
           });
       });
@@ -414,7 +436,7 @@ export default {
       this.saveFlag = false;
 
       if (this.editingNewItem) {
-        const savedItem = await this.postCmsData(this.cmsSetItemWebhook, {
+        const savedItem = await this.postCmsData(this.cmsSetWebhook, {
           command: "add",
           data: [this.getItemJson(index)],
         });
@@ -422,7 +444,7 @@ export default {
         this.editingNewItem = false;
         this.localItems[index] = savedItem[0];
       } else {
-        await this.postCmsData(this.cmsSetItemWebhook, {
+        await this.postCmsData(this.cmsSetWebhook, {
           command: "update",
           data: [this.getItemJson(index)],
         });
@@ -443,7 +465,7 @@ export default {
       }
 
       // max 10 items per api call according to airtable but maybe test this at some point
-      await this.postCmsData(this.cmsSetItemWebhook, {
+      await this.postCmsData(this.cmsSetWebhook, {
         command: "update",
         data: itemArray,
       });
@@ -464,7 +486,7 @@ export default {
       setTimeout(async () => {
         this.showItem = false;
 
-        await this.postCmsData(this.cmsSetItemWebhook, {
+        await this.postCmsData(this.cmsSetWebhook, {
           command: "delete",
           data: [this.getItemJson(index)],
         });
@@ -473,6 +495,8 @@ export default {
 
         this.items = JSON.parse(JSON.stringify(this.localItems));
         this.savingItemFlag = false;
+
+        this.saveAllItems();
       }, 100);
     },
 
@@ -505,6 +529,10 @@ export default {
 
         inputs[0].focus();
       });
+    },
+
+    base64image(image) {
+      return `data:image/svg+xml;base64,${btoa(image)}`;
     },
   },
 
