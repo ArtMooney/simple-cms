@@ -20,7 +20,9 @@
       Add, edit or remove content below
     </div>
     <div v-show="initLoadedFlag" class="cms-items-block">
-      <div @click="addItem()" class="text-s button-add-new">+ Add new item</div>
+      <div @click="addItem()" class="button add-new-item w-button">
+        + Add new item
+      </div>
     </div>
     <div
       v-show="initLoadedFlag"
@@ -134,8 +136,8 @@
                     @click="saveItem(index)"
                     :class="[
                       blinkAnim === true
-                        ? 'text-s button-controls blinking'
-                        : 'text-s button-controls',
+                        ? 'button controls w-button blinking'
+                        : 'button controls w-button',
                     ]"
                   >
                     Save
@@ -146,8 +148,8 @@
                     @click="cancelItem(index)"
                     :class="[
                       blinkAnim === true
-                        ? 'text-s button-controls blinking'
-                        : 'text-s button-controls',
+                        ? 'button controls w-button blinking'
+                        : 'button controls w-button',
                     ]"
                   >
                     Cancel
@@ -156,8 +158,8 @@
                     id="w-node-_75f843bd-5bf3-9a52-8a05-85a2c9f5e6dc-d10df2f5"
                     :class="[
                       showItem === index
-                        ? 'text-s button-controls'
-                        : 'text-s button-controls hide4',
+                        ? 'button controls w-button'
+                        : 'button controls hide4 w-button',
                     ]"
                     @click="deleteItem(index)"
                     v-show="currentIndex !== index || !editingNewItem"
@@ -237,6 +239,99 @@
       </div>
     </div>
     <img :src="base64image(xMark)" alt="" class="cms-close-button" />
+
+    <div class="login-wrapper">
+      <div class="input-container w-form">
+        <form
+          id="wf-form-login"
+          name="wf-form-login"
+          data-name="login"
+          method="get"
+          class="login-form"
+          data-wf-page-id="646a7e97a503bce4d10df2f5"
+          data-wf-element-id="88b780bd-b176-a36e-6d1c-56554b068245"
+        >
+          <div id="w-node-_60ed6772-a919-dba9-01cf-6b098abf26ba-d10df2f5">
+            Login
+          </div>
+          <input
+            type="text"
+            class="cms-input w-input"
+            maxlength="256"
+            name="name"
+            data-name="Name"
+            placeholder="Enter email address"
+            id="name"
+          /><input
+            type="email"
+            class="cms-input w-input"
+            maxlength="256"
+            name="email-3"
+            data-name="Email 3"
+            placeholder="Enter password"
+            id="email-3"
+            required=""
+          />
+          <a
+            id="w-node-_45602677-4bc4-79bc-a4cf-87b7773ce176-d10df2f5"
+            href="#"
+            class="button login w-button"
+            >Login</a
+          >
+        </form>
+        <div class="w-form-done">
+          <div>Thank you! Your submission has been received!</div>
+        </div>
+        <div class="w-form-fail">
+          <div>Oops! Something went wrong while submitting the form.</div>
+        </div>
+      </div>
+      <div class="input-container w-form">
+        <form
+          id="wf-form-login"
+          name="wf-form-login"
+          data-name="login"
+          method="get"
+          class="login-form"
+          data-wf-page-id="646a7e97a503bce4d10df2f5"
+          data-wf-element-id="fdb51ec0-2112-7bc5-fc06-a6656f9a439b"
+        >
+          <div id="w-node-fdb51ec0-2112-7bc5-fc06-a6656f9a439c-d10df2f5">
+            Reset password
+          </div>
+          <input
+            type="text"
+            class="cms-input w-input"
+            maxlength="256"
+            name="name-2"
+            data-name="Name 2"
+            placeholder="Enter new password"
+            id="name-2"
+          /><input
+            type="email"
+            class="cms-input w-input"
+            maxlength="256"
+            name="email-3"
+            data-name="Email 3"
+            placeholder="Enter new password again"
+            id="email-3"
+            required=""
+          />
+          <a
+            id="w-node-_53aedf89-7c77-e87f-bed9-0caf565ead54-d10df2f5"
+            href="#"
+            class="button login w-button"
+            >Change password</a
+          >
+        </form>
+        <div class="w-form-done">
+          <div>Thank you! Your submission has been received!</div>
+        </div>
+        <div class="w-form-fail">
+          <div>Oops! Something went wrong while submitting the form.</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -291,6 +386,21 @@ export default {
     this.schema = await this.getCmsData(this.cmsGetBaseSchema);
     this.loadData();
   },
+
+  // mounted() {
+  //   this.setLocalStorage(
+  //     "henriks-test",
+  //     "this is the saved data",
+  //     1000 * 60 * 15
+  //   );
+
+  //   setTimeout(() => {
+  //     const value = this.getLocalStorage("henriks-test");
+  //     console.log(value);
+
+  //     this.deleteLocalStorage("henriks-test");
+  //   }, 5000);
+  // },
 
   methods: {
     getCmsData(urlEndpoint, options) {
@@ -533,6 +643,36 @@ export default {
 
     base64image(image) {
       return `data:image/svg+xml;base64,${btoa(image)}`;
+    },
+
+    setLocalStorage(name, value, ttl) {
+      const now = new Date();
+      const item = {
+        value: value,
+        expiry: now.getTime() + ttl,
+      };
+      localStorage.setItem(name, JSON.stringify(item));
+    },
+
+    getLocalStorage(name) {
+      const itemStr = localStorage.getItem(name);
+
+      if (!itemStr) {
+        return null;
+      }
+
+      const item = JSON.parse(itemStr);
+      const now = new Date();
+
+      if (now.getTime() > item.expiry) {
+        localStorage.removeItem(name);
+        return null;
+      }
+      return item.value;
+    },
+
+    deleteLocalStorage(name) {
+      localStorage.removeItem(name);
     },
   },
 
