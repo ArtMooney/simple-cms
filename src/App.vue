@@ -240,7 +240,7 @@
     </div>
     <img :src="base64image(xMark)" alt="" class="cms-close-button" />
 
-    <div class="login-wrapper">
+    <div :class="[loginFlag ? 'login-wrapper' : 'login-wrapper hide1']">
       <div class="input-container w-form">
         <form
           id="wf-form-login"
@@ -376,6 +376,7 @@ export default {
       chevronDown: chevronDown,
       gripVertical: gripVertical,
       xMark: xMark,
+      loginFlag: false,
     };
   },
 
