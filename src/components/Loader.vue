@@ -1,7 +1,7 @@
 <template>
   <div class="loader">
     <div class="loader-container">
-      <Vue3Lottie :animationData="loaderAnim" :height="200" :width="200" />
+      <Vue3Lottie :animationData="loaderAnim" :height="100" :width="200" />
       <div class="text-s">Loading</div>
     </div>
   </div>
