@@ -315,7 +315,7 @@ export default {
             return response.json();
           })
           .then((result) => {
-            console.log("success", result);
+            // console.log("success", result);
 
             if (result.status === "ok") {
               event.target.style.display = "none";
@@ -324,7 +324,7 @@ export default {
               this.setLocalStorage(
                 "simple-cms-login",
                 { email: this.loginEmail, password: this.loginPassword },
-                1000 * 60 * 1
+                1000 * 60 * 43200
               );
 
               this.loginPanel = false;
@@ -336,7 +336,8 @@ export default {
             }
           })
           .catch((error) => {
-            console.log("error");
+            // console.log("error");
+
             errorMessage.style.display = "block";
             event.submitter.value = submitterBak;
           });
@@ -356,7 +357,7 @@ export default {
             return response.json();
           })
           .then((result) => {
-            console.log("success", result);
+            // console.log("success", result);
 
             if (result.status === "ok") {
               event.target.style.display = "none";
@@ -369,7 +370,8 @@ export default {
             }
           })
           .catch((error) => {
-            console.log("error");
+            // console.log("error");
+
             errorMessage.style.display = "block";
             event.submitter.value = submitterBak;
           });
@@ -394,7 +396,7 @@ export default {
             return response.json();
           })
           .then((result) => {
-            console.log("success", result);
+            // console.log("success", result);
 
             if (result.status === "ok") {
               event.target.style.display = "none";
@@ -410,7 +412,8 @@ export default {
             }
           })
           .catch((error) => {
-            console.log("error");
+            // console.log("error");
+
             errorMessage.style.display = "block";
             event.submitter.value = submitterBak;
           });

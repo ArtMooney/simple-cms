@@ -1,7 +1,25 @@
 <template>
   <div class="simple-cms-wrapper">
     <div class="navbar">
-      <img :src="base64image(xMark)" alt="" class="cms-close-button" />
+      <img
+        @click="backHomepage"
+        :src="base64image(house)"
+        id="w-node-_9debdf39-b234-1d75-2a2c-19226d1fb725-d10df2f5"
+        alt=""
+        class="cms-back-home"
+      /><img
+        @click="cmsSettingsMenu = !cmsSettingsMenu"
+        :src="base64image(gear)"
+        alt=""
+        class="cms-account-settings"
+      />
+      <div
+        v-show="cmsSettingsMenu"
+        id="w-node-_51417cfc-c8d6-508c-0eea-57308765861a-d10df2f5"
+        class="cms-settings-menu"
+      >
+        <div @click="logOut" class="button bare">Log out</div>
+      </div>
     </div>
 
     <h1 class="text-center">{{ cmsName }}</h1>
@@ -246,7 +264,8 @@ import { Drag, DropList } from "vue-easy-dnd";
 import "vue-easy-dnd/dist/dnd.css";
 import chevronDown from "../images/chevron-down.svg?raw";
 import gripVertical from "../images/grip-vertical.svg?raw";
-import xMark from "../images/xmark.svg?raw";
+import house from "../images/house.svg?raw";
+import gear from "../images/gear.svg?raw";
 
 export default {
   name: "Cms",
@@ -279,9 +298,11 @@ export default {
       dragVibration: 100,
       editingNewItem: false,
       appError: false,
+      cmsSettingsMenu: false,
       chevronDown: chevronDown,
       gripVertical: gripVertical,
-      xMark: xMark,
+      house: house,
+      gear: gear,
     };
   },
 
@@ -567,6 +588,22 @@ export default {
         return null;
       }
       return item.value;
+    },
+
+    deleteLocalStorage(name) {
+      localStorage.removeItem(name);
+    },
+
+    backHomepage() {
+      const protocol = window.location.protocol + "//";
+      const siteDomain = window.location.host;
+
+      window.location.href = protocol + siteDomain;
+    },
+
+    logOut() {
+      this.deleteLocalStorage("simple-cms-login");
+      location.reload();
     },
   },
 

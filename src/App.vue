@@ -24,10 +24,6 @@ export default {
   },
 
   created() {
-    console.clear();
-
-    // this.deleteLocalStorage("simple-cms-login");
-
     if (!this.getLocalStorage("simple-cms-login")) {
       this.loginFlag = true;
     } else {
@@ -38,8 +34,6 @@ export default {
 
   methods: {
     handleLoginStatus(status) {
-      console.log("LOGIN", status);
-
       if (status === "ok") {
         this.loaderFlag = true;
         this.cmsFlag = true;
