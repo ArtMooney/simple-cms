@@ -578,10 +578,6 @@ export default {
   pointer-events: auto;
 }
 
-.item-control-wrapper {
-  pointer-events: none;
-}
-
 @keyframes blink {
   0% {
     background-color: #8a548b;
