@@ -259,6 +259,7 @@ export default {
       localItems: [],
       userName: "FrameCore",
       userPass: "CMS-development",
+      login: {},
       apiBaseUrl: "https://api.framecore.se/webhook/simple-cms/",
       cmsGetBaseSchema: "get-base",
       cmsGetWebhook: "get-items",
@@ -285,9 +286,14 @@ export default {
   },
 
   async created() {
+    if (this.getLocalStorage("simple-cms-login")) {
+      this.login = this.getLocalStorage("simple-cms-login");
+    }
+
     this.schemaIndex = 0;
     this.schema = await this.getCmsData(
-      this.apiBaseUrl + this.cmsGetBaseSchema
+      this.apiBaseUrl + this.cmsGetBaseSchema,
+      "email=" + this.login.email + "&password=" + this.login.password
     );
     this.loadData();
   },
@@ -440,6 +446,8 @@ export default {
           this.apiBaseUrl + this.cmsSetWebhook,
           {
             command: "add",
+            email: this.login.email,
+            password: this.login.password,
             data: [this.getItemJson(index)],
           }
         );
@@ -449,6 +457,8 @@ export default {
       } else {
         await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
           command: "update",
+          email: this.login.email,
+          password: this.login.password,
           data: [this.getItemJson(index)],
         });
       }
@@ -470,6 +480,8 @@ export default {
       // max 10 items per api call according to airtable but maybe test this at some point
       await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
         command: "update",
+        email: this.login.email,
+        password: this.login.password,
         data: itemArray,
       });
       this.items = JSON.parse(JSON.stringify(this.localItems));
@@ -491,6 +503,8 @@ export default {
 
         await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
           command: "delete",
+          email: this.login.email,
+          password: this.login.password,
           data: [this.getItemJson(index)],
         });
 
@@ -536,6 +550,23 @@ export default {
 
     base64image(image) {
       return `data:image/svg+xml;base64,${btoa(image)}`;
+    },
+
+    getLocalStorage(name) {
+      const itemStr = localStorage.getItem(name);
+
+      if (!itemStr) {
+        return null;
+      }
+
+      const item = JSON.parse(itemStr);
+      const now = new Date();
+
+      if (now.getTime() > item.expiry) {
+        localStorage.removeItem(name);
+        return null;
+      }
+      return item.value;
     },
   },
 

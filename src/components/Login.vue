@@ -324,7 +324,7 @@ export default {
               this.setLocalStorage(
                 "simple-cms-login",
                 { email: this.loginEmail, password: this.loginPassword },
-                1000 * 60 * 15
+                1000 * 60 * 1
               );
 
               this.loginPanel = false;
