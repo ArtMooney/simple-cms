@@ -280,12 +280,20 @@ export default {
       this.loginPanel = true;
       this.resetPasswordPanel = false;
       this.newPasswordPanel = false;
+
+      const urlWithoutQueryString = window.location.href.split("?")[0];
+      history.replaceState({}, document.title, urlWithoutQueryString);
+      this.extraFields.pageuri = urlWithoutQueryString;
     },
 
     resetPasswordSwitch() {
       this.loginPanel = false;
       this.resetPasswordPanel = true;
       this.newPasswordPanel = false;
+
+      const urlWithoutQueryString = window.location.href.split("?")[0];
+      history.replaceState({}, document.title, urlWithoutQueryString);
+      this.extraFields.pageuri = urlWithoutQueryString;
     },
 
     newPasswordSwitch() {
