@@ -70,3 +70,9 @@ export default {
   },
 };
 </script>
+
+<style>
+@import "./css/normalize.css";
+@import "./css/webflow.css";
+@import "./css/simple-cms.css";
+</style>
