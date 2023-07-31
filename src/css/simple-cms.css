@@ -398,6 +398,7 @@ blockquote {
 }
 
 .button {
+  min-width: 0;
   text-align: center;
   text-transform: none;
   background-color: #548b63;
