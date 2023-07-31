@@ -150,6 +150,8 @@ blockquote {
   padding-top: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  font-family: Droid Sans, sans-serif;
+  font-weight: 400;
   display: flex;
   position: relative;
 }
@@ -356,10 +358,6 @@ blockquote {
   padding: 1rem;
 }
 
-.text-center {
-  text-align: center;
-}
-
 .login-wrapper {
   grid-column-gap: 16px;
   grid-row-gap: 16px;
@@ -403,7 +401,9 @@ blockquote {
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0.3rem;
   padding: 0.5rem;
+  font-family: Droid Sans, sans-serif;
   font-size: 70%;
+  font-weight: 400;
   line-height: 150%;
 }
 
@@ -507,6 +507,12 @@ blockquote {
   grid-auto-columns: auto;
   padding: 1rem;
   box-shadow: 3px 4px 12px rgba(0, 0, 0, 0.22);
+}
+
+.cms-title {
+  text-align: center;
+  font-family: Exo, sans-serif;
+  font-weight: 700;
 }
 
 @media screen and (max-width: 991px) {

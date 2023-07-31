@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <h1 class="text-center">{{ cmsName }}</h1>
+    <h1 class="cms-title">{{ cmsName }}</h1>
     <div>by FrameCore</div>
     <div class="collection-wrapper">
       <div v-for="(table, index) of schema">
