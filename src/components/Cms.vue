@@ -18,7 +18,7 @@
         id="w-node-_51417cfc-c8d6-508c-0eea-57308765861a-d10df2f5"
         class="cms-settings-menu"
       >
-        <div @click="logOut" class="button bare">Log out</div>
+        <div @click="logOut" class="cms-button bare">Log out</div>
       </div>
     </div>
 
@@ -40,7 +40,7 @@
     </div>
     <div class="text-s">Add, edit or remove content below</div>
     <div class="cms-items-block">
-      <div @click="addItem()" class="button add-new-item w-button">
+      <div @click="addItem()" class="cms-button add-new-item w-button">
         + Add new item
       </div>
     </div>
@@ -152,8 +152,8 @@
                     @click="saveItem(index)"
                     :class="[
                       blinkAnim === true
-                        ? 'button controls w-button blinking'
-                        : 'button controls w-button',
+                        ? 'cms-button controls w-button blinking'
+                        : 'cms-button controls w-button',
                     ]"
                   >
                     Save
@@ -164,8 +164,8 @@
                     @click="cancelItem(index)"
                     :class="[
                       blinkAnim === true
-                        ? 'button controls w-button blinking'
-                        : 'button controls w-button',
+                        ? 'cms-button controls w-button blinking'
+                        : 'cms-button controls w-button',
                     ]"
                   >
                     Cancel
@@ -174,8 +174,8 @@
                     id="w-node-_75f843bd-5bf3-9a52-8a05-85a2c9f5e6dc-d10df2f5"
                     :class="[
                       showItem === index
-                        ? 'button controls w-button'
-                        : 'button controls hide4 w-button',
+                        ? 'cms-button controls w-button'
+                        : 'cms-button controls hide4 w-button',
                     ]"
                     @click="deleteItem(index)"
                     v-show="currentIndex !== index || !editingNewItem"

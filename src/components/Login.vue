@@ -34,7 +34,7 @@
           value="Login"
           data-wait="Please wait..."
           id="w-node-d7ba7197-8b6a-ff9d-7562-8b57f7d33f6e-d10df2f5"
-          class="button login w-button"
+          class="cms-button login w-button"
         />
         <a
           @click="resetPasswordSwitch"
@@ -70,7 +70,7 @@
           value="Send password reset link"
           data-wait="Please wait..."
           id="w-node-_8862a37a-1930-f237-f612-0f358c05ed9a-d10df2f5"
-          class="button login w-button"
+          class="cms-button login w-button"
         />
         <a
           @click="loginSwitch"
@@ -122,7 +122,7 @@
           value="Change password"
           data-wait="Please wait..."
           id="w-node-fcdb5a66-c25c-e9d8-0b5d-c443f2cb77d4-d10df2f5"
-          class="button login w-button"
+          class="cms-button login w-button"
         />
         <a
           @click="loginSwitch"

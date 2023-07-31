@@ -397,7 +397,7 @@ blockquote {
   display: flex;
 }
 
-.button {
+.cms-button {
   min-width: 0;
   text-align: center;
   text-transform: none;
@@ -412,32 +412,32 @@ blockquote {
   line-height: 150%;
 }
 
-.button:hover {
+.cms-button:hover {
   background-color: #6bad7d;
 }
 
-.button.login {
+.cms-button.login {
   margin-top: 1rem;
 }
 
-.button.add-new-item {
+.cms-button.add-new-item {
   margin-top: 1rem;
   margin-bottom: 1rem;
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
 }
 
-.button.controls {
+.cms-button.controls {
   background-color: #8a548b;
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
 }
 
-.button.controls:hover {
+.cms-button.controls:hover {
   background-color: #b280b4;
 }
 
-.button.bare {
+.cms-button.bare {
   color: rgba(235, 235, 235, 0.7);
   cursor: pointer;
   background-color: rgba(0, 0, 0, 0);
@@ -446,7 +446,7 @@ blockquote {
   padding: 0;
 }
 
-.button.bare:hover {
+.cms-button.bare:hover {
   color: #ebebeb;
 }
 
@@ -702,7 +702,7 @@ blockquote {
     width: 100vw;
   }
 
-  .button.controls.hide4 {
+  .cms-button.controls.hide4 {
     display: none;
   }
 
