@@ -3,13 +3,13 @@
     <div class="navbar">
       <img
         @click="backHomepage"
-        :src="base64image(house)"
+        :src="base64svg(house)"
         id="w-node-_9debdf39-b234-1d75-2a2c-19226d1fb725-d10df2f5"
         alt=""
         class="cms-back-home"
       /><img
         @click="cmsSettingsMenu = !cmsSettingsMenu"
-        :src="base64image(gear)"
+        :src="base64svg(gear)"
         alt=""
         class="cms-account-settings"
       />
@@ -24,6 +24,7 @@
 
     <h1 class="cms-title">{{ cmsName }}</h1>
     <div>by FrameCore</div>
+
     <div class="collection-wrapper">
       <div v-for="(table, index) of schema">
         <div
@@ -38,6 +39,7 @@
         </div>
       </div>
     </div>
+
     <div class="text-s">Add, edit or remove content below</div>
     <div class="cms-items-block">
       <div @click="addItem()" class="cms-button add-new-item w-button">
@@ -70,7 +72,7 @@
             <drag
               :delay="dragDelay"
               :vibration="dragVibration"
-              @click.prevent="handleClick($event, index)"
+              @click="handleClick($event, index)"
               class="cms-item"
               v-show="!loadingFlag"
               :ref="`list-item-${index}`"
@@ -86,7 +88,7 @@
                   class="item-title-wrapper"
                 >
                   <img
-                    :src="base64image(gripVertical)"
+                    :src="base64svg(gripVertical)"
                     id="w-node-_3152d18a-1e62-e7da-3fba-64d3117471a9-d10df2f5"
                     alt=""
                     class="dragdrop-handle"
@@ -100,7 +102,7 @@
                 </div>
                 <div class="item-grid show4">
                   <img
-                    :src="base64image(chevronDown)"
+                    :src="base64svg(chevronDown)"
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
@@ -149,7 +151,7 @@
                   <div
                     id="w-node-_0b476731-d8fb-2341-5ad4-24f0f7c9aac8-d10df2f5"
                     v-if="showItem === index && saveFlag"
-                    @click="saveItem(index)"
+                    @click.stop="saveItem(index)"
                     :class="[
                       blinkAnim === true
                         ? 'cms-button controls w-button blinking'
@@ -161,7 +163,7 @@
                   <div
                     id="w-node-b1b7d981-a5e9-7138-58d8-3d72cfc97804-d10df2f5"
                     v-if="showItem === index && saveFlag"
-                    @click="cancelItem(index)"
+                    @click.stop="cancelItem(index)"
                     :class="[
                       blinkAnim === true
                         ? 'cms-button controls w-button blinking'
@@ -177,7 +179,7 @@
                         ? 'cms-button controls w-button'
                         : 'cms-button controls hide4 w-button',
                     ]"
-                    @click="deleteItem(index)"
+                    @click.stop="deleteItem(index)"
                     v-show="currentIndex !== index || !editingNewItem"
                   >
                     Delete
@@ -188,7 +190,7 @@
                   class="item-grid hide4"
                 >
                   <img
-                    :src="base64image(chevronDown)"
+                    :src="base64svg(chevronDown)"
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
@@ -235,14 +237,81 @@
                     {{ input.name }}
                   </div>
                   <input
-                    v-if="input.name !== 'index'"
+                    v-if="
+                      input.name !== 'index' &&
+                      getInputType(input.type) !== 'textarea' &&
+                      getInputType(input.type) !== 'file'
+                    "
                     @click="handleInput"
                     v-model="item.fields[input.name]"
-                    :type="setCorrectType(input.type)"
-                    class="cms-input w-input"
+                    :type="getInputType(input.type)"
+                    :class="[
+                      getInputType(input.type) === 'checkbox'
+                        ? 'w-checkbox-input cms-input checkbox'
+                        : 'cms-input w-input',
+                    ]"
                     :name="input.name"
-                    required=""
                   />
+
+                  <textarea
+                    v-if="
+                      input.name !== 'index' &&
+                      getInputType(input.type) === 'textarea' &&
+                      getInputType(input.type) !== 'file'
+                    "
+                    @click="handleInput"
+                    v-model="item.fields[input.name]"
+                    :type="getInputType(input.type)"
+                    class="cms-input message w-input"
+                    :name="input.name"
+                  ></textarea>
+
+                  <div
+                    v-if="
+                      input.name !== 'index' &&
+                      getInputType(input.type) === 'file'
+                    "
+                    id="w-node-_59be39db-3067-b4db-62e1-04f78c919737-d10df2f5"
+                    class="filename-wrapper"
+                  >
+                    <input
+                      v-if="
+                        input.name !== 'index' &&
+                        getInputType(input.type) === 'file'
+                      "
+                      @click="handleInput"
+                      @change="
+                        handleFileInput(
+                          $event,
+                          item.fields[input.name],
+                          input.name,
+                          item.fields
+                        )
+                      "
+                      :id="`${input.name}-${index}`"
+                      :ref="`${input.name}-${index}`"
+                      class="hide1"
+                      :type="getInputType(input.type)"
+                      :name="`${input.name}`"
+                      accept=".jpg, .jpeg, .png"
+                    />
+
+                    <label
+                      @click="handleInput"
+                      :for="`${input.name}-${index}`"
+                      class="text-s linkstyle"
+                    >
+                      {{ displayFilename(item.fields[input.name]) }}
+                    </label>
+
+                    <img
+                      @click.stop="removeFile(index, `${input.name}-${index}`)"
+                      :src="base64svg(xmark)"
+                      loading="lazy"
+                      alt=""
+                      class="remove-image"
+                    />
+                  </div>
                 </template>
               </div>
             </drag>
@@ -266,6 +335,7 @@ import chevronDown from "../images/chevron-down.svg?raw";
 import gripVertical from "../images/grip-vertical.svg?raw";
 import house from "../images/house.svg?raw";
 import gear from "../images/gear.svg?raw";
+import xmark from "../images/xmark.svg?raw";
 
 export default {
   name: "Cms",
@@ -303,6 +373,7 @@ export default {
       gripVertical: gripVertical,
       house: house,
       gear: gear,
+      xmark: xmark,
     };
   },
 
@@ -311,7 +382,6 @@ export default {
       this.login = this.getLocalStorage("simple-cms-login");
     }
 
-    this.schemaIndex = 0;
     this.schema = await this.getCmsData(
       this.apiBaseUrl + this.cmsGetBaseSchema,
       "email=" + this.login.email + "&password=" + this.login.password
@@ -354,11 +424,10 @@ export default {
         var requestOptions = {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
             Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
           },
 
-          body: JSON.stringify(data),
+          body: data,
           redirect: "follow",
         };
 
@@ -379,6 +448,32 @@ export default {
             reject(error);
           });
       });
+    },
+
+    formDataWrapper(form, data, dataObject) {
+      let formData = new FormData();
+
+      if (form) {
+        for (const item of form.querySelectorAll("input")) {
+          if (item.type === "file") {
+            if (item.files[0]) {
+              for (const file of item.files) {
+                formData.append(item.name, file, file.name);
+              }
+            }
+          }
+        }
+      }
+
+      // add the data-fields
+      for (const [key, value] of Object.entries(data)) {
+        formData.append(key, value);
+      }
+
+      // add the data-object
+      formData.append("dataobject", JSON.stringify(dataObject));
+
+      return formData;
     },
 
     async loadData() {
@@ -421,17 +516,38 @@ export default {
       this.currentIndex = index;
     },
 
-    handleInput(event) {
+    handleInput() {
       this.showItem = true;
     },
 
-    setCorrectType(type) {
+    handleFileInput(event, input, name, inputFields) {
+      if (!event.target.files[0].name) return;
+
+      const fileName = event.target.files[0].name;
+
+      if (!input) {
+        inputFields[name] = [{ url: fileName }];
+      } else {
+        Object.keys(input[0]).forEach(function (key) {
+          delete input[0][key];
+        });
+
+        input[0].url = fileName;
+      }
+    },
+
+    getInputType(type) {
       let inputType = "text";
 
       if (type === "multilineText") {
         inputType = "textarea";
-      } else if (type === "datum") {
+      } else if (type === "date") {
+        // this needs to be supported in the cms before use
         inputType = "date";
+      } else if (type === "checkbox") {
+        inputType = "checkbox";
+      } else if (type === "multipleAttachments") {
+        inputType = "file";
       }
 
       return inputType;
@@ -443,7 +559,12 @@ export default {
       let modified = false;
 
       for (const [index, input] of Object.entries(localItems.fields)) {
-        if (input !== items.fields[index]) modified = true;
+        const localObject = JSON.stringify(input);
+        const itemsObject = JSON.stringify(items.fields[index]);
+
+        if (localObject !== itemsObject) {
+          modified = true;
+        }
       }
 
       return modified;
@@ -463,29 +584,45 @@ export default {
       this.saveFlag = false;
 
       if (this.editingNewItem) {
+        const data = {
+          command: "add",
+          email: this.login.email,
+          password: this.login.password,
+        };
+
         const savedItem = await this.postCmsData(
           this.apiBaseUrl + this.cmsSetWebhook,
-          {
-            command: "add",
-            email: this.login.email,
-            password: this.login.password,
-            data: [this.getItemJson(index)],
-          }
+          this.formDataWrapper(this.getFormElement(index), data, [
+            this.getItemJson(index),
+          ])
         );
 
         this.editingNewItem = false;
         this.localItems[index] = savedItem[0];
       } else {
-        await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
+        const data = {
           command: "update",
           email: this.login.email,
           password: this.login.password,
-          data: [this.getItemJson(index)],
-        });
+        };
+
+        await this.postCmsData(
+          this.apiBaseUrl + this.cmsSetWebhook,
+          this.formDataWrapper(this.getFormElement(index), data, [
+            this.getItemJson(index),
+          ])
+        );
       }
 
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingItemFlag = false;
+      this.showItem = false;
+    },
+
+    getFormElement(index) {
+      return this.$refs["list-item-" + index].$el.querySelectorAll(
+        ".cms-inputs"
+      )[0];
     },
 
     async saveAllItems() {
@@ -498,21 +635,26 @@ export default {
         itemArray.push(this.getItemJson(index));
       }
 
-      // max 10 items per api call according to airtable but maybe test this at some point
-      await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
+      const data = {
         command: "update",
         email: this.login.email,
         password: this.login.password,
-        data: itemArray,
-      });
+      };
+
+      await this.postCmsData(
+        this.apiBaseUrl + this.cmsSetWebhook,
+        this.formDataWrapper(null, data, itemArray)
+      );
+
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingAllItemsFlag = false;
       this.saveFlag = false;
     },
 
-    async cancelItem() {
+    async cancelItem(index) {
       this.saveFlag = false;
       this.localItems = JSON.parse(JSON.stringify(this.items));
+      this.showItem = false;
     },
 
     deleteItem(index) {
@@ -522,12 +664,16 @@ export default {
       setTimeout(async () => {
         this.showItem = false;
 
-        await this.postCmsData(this.apiBaseUrl + this.cmsSetWebhook, {
+        const data = {
           command: "delete",
           email: this.login.email,
           password: this.login.password,
-          data: [this.getItemJson(index)],
-        });
+        };
+
+        await this.postCmsData(
+          this.apiBaseUrl + this.cmsSetWebhook,
+          this.formDataWrapper(null, data, [this.getItemJson(index)])
+        );
 
         this.localItems.splice(index, 1);
 
@@ -544,7 +690,14 @@ export default {
       this.currentIndex = index;
       let fields = {};
 
-      for (const item of this.schema[0].fields) fields[item.name] = "";
+      for (const item of this.schema[this.schemaIndex].fields) {
+        if (item.type === "checkbox") {
+          fields[item.name] = false;
+        } else {
+          fields[item.name] = "";
+        }
+      }
+
       fields.index = index;
 
       this.localItems.push({
@@ -569,7 +722,7 @@ export default {
       });
     },
 
-    base64image(image) {
+    base64svg(image) {
       return `data:image/svg+xml;base64,${btoa(image)}`;
     },
 
@@ -605,6 +758,29 @@ export default {
       this.deleteLocalStorage("simple-cms-login");
       location.reload();
     },
+
+    displayFilename(filename) {
+      if (filename) {
+        if (filename[0].filename) {
+          return filename[0].filename;
+        } else if (filename[0].url) {
+          return filename[0].url;
+        }
+      }
+
+      return "Click here to choose an image.";
+    },
+
+    removeFile(index, inputName) {
+      if (
+        this.localItems[index] &&
+        this.localItems[index].fields &&
+        this.localItems[index].fields.bild
+      ) {
+        this.$refs[inputName][0].value = "";
+        this.localItems[index].fields.bild[0] = { url: "" };
+      }
+    },
   },
 
   watch: {
@@ -627,6 +803,7 @@ export default {
     },
 
     schemaIndex() {
+      this.showItem = false;
       this.loadData();
     },
 
