@@ -40,7 +40,7 @@
           @click="resetPasswordSwitch"
           id="w-node-_6ce24ce0-9e2b-981c-b286-b44d7ea6883a-d10df2f5"
           class="text-s pointer"
-          >Forgot you password?</a
+          >Forgot your password?</a
         >
       </form>
       <div class="success-message w-form-done"></div>
