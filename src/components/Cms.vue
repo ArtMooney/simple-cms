@@ -491,7 +491,11 @@ export default {
     },
 
     handleClick(event, index) {
-      if (this.saveFlag && event.target.nodeName !== "INPUT") {
+      if (
+        this.saveFlag &&
+        event.target.nodeName !== "INPUT" &&
+        event.target.nodeName !== "TEXTAREA"
+      ) {
         const element = this.$refs["list-item-" + this.showItem].$el;
 
         element.scrollIntoView({
@@ -516,7 +520,7 @@ export default {
       this.currentIndex = index;
     },
 
-    handleInput() {
+    handleInput(event) {
       this.showItem = true;
     },
 
