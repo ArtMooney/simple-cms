@@ -508,6 +508,14 @@ blockquote {
   color: #ebebeb;
 }
 
+.cms-button.sort-by-date {
+  background-color: #caac4f;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+
 .success-message {
   background-color: rgba(0, 0, 0, 0);
 }
@@ -606,6 +614,13 @@ blockquote {
   display: flex;
 }
 
+.cms-items-menu {
+  width: 100%;
+  max-width: 50rem;
+  justify-content: space-between;
+  display: flex;
+}
+
 @media screen and (max-width: 991px) {
   h1 {
     font-size: 3rem;
@@ -640,7 +655,8 @@ blockquote {
     grid-auto-columns: auto;
   }
 
-  .cms-items-block {
+  .cms-items-block,
+  .cms-items-menu {
     width: 100%;
   }
 }

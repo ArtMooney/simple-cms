@@ -41,11 +41,14 @@
     </div>
 
     <div class="text-s">Add, edit or remove content below</div>
-    <div class="cms-items-block">
+
+    <div class="cms-items-menu">
       <div @click="addItem()" class="cms-button add-new-item w-button">
         + Add new item
       </div>
+      <div class="cms-button sort-by-date w-button">Sort list by date</div>
     </div>
+
     <div v-if="!localItems.length" class="cms-items-block">
       <div v-show="!loadingFlag" class="text-s list-message">
         No items found
