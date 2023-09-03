@@ -544,7 +544,8 @@ export default {
         this.saveFlag &&
         event.target.nodeName !== "INPUT" &&
         event.target.nodeName !== "TEXTAREA" &&
-        event.target.nodeName !== "SPAN"
+        event.target.nodeName !== "SPAN" &&
+        event.target.nodeName !== "LABEL"
       ) {
         this.alertSaveFlag();
         return;
@@ -620,7 +621,7 @@ export default {
         const itemsObject = JSON.stringify(items[index]);
 
         if (localObject !== itemsObject) {
-          if (input !== "" && input !== false) {
+          if (input !== "" && input !== false && input !== null) {
             modified = true;
           }
         }
