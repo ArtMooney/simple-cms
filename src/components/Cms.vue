@@ -46,7 +46,9 @@
       <div @click="addItem()" class="cms-button add-new-item w-button">
         + Add new item
       </div>
-      <div class="cms-button sort-by-date w-button">Sort list by date</div>
+      <div @click="sortItems()" class="cms-button sort-by-date w-button">
+        Sort list by date
+      </div>
     </div>
 
     <div v-if="!localItems.length" class="cms-items-block">
@@ -100,7 +102,7 @@
                     id="w-node-ec545091-3119-9423-b023-febb8072a9c9-d10df2f5"
                     style="pointer-events: none"
                   >
-                    {{ item.fields.titel }}
+                    {{ item.titel }}
                   </div>
                 </div>
                 <div class="item-grid show4">
@@ -243,27 +245,57 @@
                     v-if="
                       input.name !== 'index' &&
                       getInputType(input.type) !== 'textarea' &&
-                      getInputType(input.type) !== 'file'
+                      getInputType(input.type) !== 'file' &&
+                      getInputType(input.type) !== 'date' &&
+                      getInputType(input.type) !== 'checkbox'
                     "
                     @click="handleInput"
-                    v-model="item.fields[input.name]"
+                    v-model="item[input.name]"
                     :type="getInputType(input.type)"
-                    :class="[
-                      getInputType(input.type) === 'checkbox'
-                        ? 'w-checkbox-input cms-input checkbox'
-                        : 'cms-input w-input',
-                    ]"
+                    class="cms-input w-input"
                     :name="input.name"
                   />
+
+                  <label
+                    v-if="
+                      input.name !== 'index' &&
+                      getInputType(input.type) === 'checkbox'
+                    "
+                    class="w-checkbox checkbox-wrapper"
+                    @click="handleInput"
+                  >
+                    <input
+                      type="checkbox"
+                      v-model="item[input.name]"
+                      :name="input.name"
+                      style="opacity: 0; position: absolute; z-index: -1"
+                    />
+                    <span
+                      class="w-checkbox-input w-checkbox-input--inputType-custom cms-input checkbox"
+                    ></span>
+                  </label>
+
+                  <VueDatePicker
+                    v-if="
+                      input.name !== 'index' &&
+                      getInputType(input.type) === 'date'
+                    "
+                    v-model="item[input.name]"
+                    :format="'yyyy-MM-dd'"
+                    locale="sv"
+                    auto-apply=""
+                    input-class-name="cms-input dp-custom-input w-input"
+                    :name="input.name"
+                  >
+                  </VueDatePicker>
 
                   <textarea
                     v-if="
                       input.name !== 'index' &&
-                      getInputType(input.type) === 'textarea' &&
-                      getInputType(input.type) !== 'file'
+                      getInputType(input.type) === 'textarea'
                     "
                     @click="handleInput"
-                    v-model="item.fields[input.name]"
+                    v-model="item[input.name]"
                     :type="getInputType(input.type)"
                     class="cms-input message w-input"
                     :name="input.name"
@@ -286,9 +318,9 @@
                       @change="
                         handleFileInput(
                           $event,
-                          item.fields[input.name],
+                          item[input.name],
                           input.name,
-                          item.fields
+                          item
                         )
                       "
                       :id="`${input.name}-${index}`"
@@ -304,7 +336,7 @@
                       :for="`${input.name}-${index}`"
                       class="text-s linkstyle"
                     >
-                      {{ displayFilename(item.fields[input.name]) }}
+                      {{ displayFilename(item[input.name]) }}
                     </label>
 
                     <img
@@ -334,6 +366,9 @@ import { Vue3Lottie } from "vue3-lottie";
 import loaderAnim from "../documents/77076-loading.json";
 import { Drag, DropList } from "vue-easy-dnd";
 import "vue-easy-dnd/dist/dnd.css";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+
 import chevronDown from "../images/chevron-down.svg?raw";
 import gripVertical from "../images/grip-vertical.svg?raw";
 import house from "../images/house.svg?raw";
@@ -342,7 +377,7 @@ import xmark from "../images/xmark.svg?raw";
 
 export default {
   name: "Cms",
-  components: { Vue3Lottie, Drag, DropList },
+  components: { Vue3Lottie, Drag, DropList, VueDatePicker },
 
   data() {
     return {
@@ -352,7 +387,7 @@ export default {
       userName: "FrameCore",
       userPass: "CMS-development",
       login: {},
-      apiBaseUrl: "https://api.framecore.se/webhook/simple-cms/",
+      apiBaseUrl: "https://api.framecore.se/webhook/simple-cms-dev/",
       cmsGetBaseSchema: "get-base",
       cmsGetWebhook: "get-items",
       cmsSetWebhook: "set",
@@ -362,7 +397,7 @@ export default {
       savingItemFlag: false,
       savingAllItemsFlag: false,
       currentIndex: false,
-      schemaIndex: 0,
+      schemaIndex: 1,
       loaderAnim,
       loadingFlag: true,
       initLoadedFlag: false,
@@ -372,6 +407,8 @@ export default {
       editingNewItem: false,
       appError: false,
       cmsSettingsMenu: false,
+      selectDate: new Date(),
+
       chevronDown: chevronDown,
       gripVertical: gripVertical,
       house: house,
@@ -381,6 +418,8 @@ export default {
   },
 
   async created() {
+    console.clear();
+
     if (this.getLocalStorage("simple-cms-login")) {
       this.login = this.getLocalStorage("simple-cms-login");
     }
@@ -389,7 +428,13 @@ export default {
       this.apiBaseUrl + this.cmsGetBaseSchema,
       "email=" + this.login.email + "&password=" + this.login.password
     );
+
     this.loadData();
+
+    setTimeout(() => {
+      console.log("SCHEMA", JSON.parse(JSON.stringify(this.schema)));
+      console.log("ITEMS", JSON.parse(JSON.stringify(this.items)));
+    }, 3000);
   },
 
   methods: {
@@ -486,6 +531,7 @@ export default {
         this.apiBaseUrl + this.cmsGetWebhook,
         "id=" + this.schema[this.schemaIndex].id
       );
+
       this.localItems = JSON.parse(JSON.stringify(this.items));
 
       this.loadingFlag = false;
@@ -497,20 +543,10 @@ export default {
       if (
         this.saveFlag &&
         event.target.nodeName !== "INPUT" &&
-        event.target.nodeName !== "TEXTAREA"
+        event.target.nodeName !== "TEXTAREA" &&
+        event.target.nodeName !== "SPAN"
       ) {
-        const element = this.$refs["list-item-" + this.showItem].$el;
-
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-
-        this.blinkAnim = true;
-        setTimeout(() => {
-          this.blinkAnim = false;
-        }, 2000);
-
+        this.alertSaveFlag();
         return;
       }
 
@@ -521,6 +557,20 @@ export default {
       }
 
       this.currentIndex = index;
+    },
+
+    alertSaveFlag() {
+      const element = this.$refs["list-item-" + this.showItem].$el;
+
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      this.blinkAnim = true;
+      setTimeout(() => {
+        this.blinkAnim = false;
+      }, 2000);
     },
 
     handleInput(event) {
@@ -565,12 +615,14 @@ export default {
 
       let modified = false;
 
-      for (const [index, input] of Object.entries(localItems.fields)) {
+      for (const [index, input] of Object.entries(localItems)) {
         const localObject = JSON.stringify(input);
-        const itemsObject = JSON.stringify(items.fields[index]);
+        const itemsObject = JSON.stringify(items[index]);
 
         if (localObject !== itemsObject) {
-          modified = true;
+          if (input !== "" && input !== false) {
+            modified = true;
+          }
         }
       }
 
@@ -579,7 +631,24 @@ export default {
 
     getItemJson(index) {
       let itemJson = {};
-      itemJson = JSON.parse(JSON.stringify(this.localItems[index].fields));
+      itemJson = JSON.parse(JSON.stringify(this.localItems[index]));
+
+      // delete keys where values are empty
+      for (const item of Object.entries(itemJson)) {
+        if (!item[1]) {
+          delete itemJson[item[0]];
+        }
+      }
+
+      itemJson.id = this.localItems[index].id;
+      itemJson.tableid = this.schema[this.schemaIndex].id;
+
+      return itemJson;
+    },
+
+    getItemOrder(index) {
+      let itemJson = {};
+      itemJson.index = index;
       itemJson.id = this.localItems[index].id;
       itemJson.tableid = this.schema[this.schemaIndex].id;
 
@@ -605,7 +674,8 @@ export default {
         );
 
         this.editingNewItem = false;
-        this.localItems[index] = savedItem[0];
+        this.localItems[index] = savedItem[0].fields;
+        this.localItems[index].id = savedItem[0].id;
       } else {
         const data = {
           command: "update",
@@ -638,12 +708,29 @@ export default {
       this.saveFlag = true;
 
       for (const [index, item] of Object.entries(this.localItems)) {
-        item.fields.index = index;
-        itemArray.push(this.getItemJson(index));
+        item.index = index;
+        itemArray.push({ fields: this.getItemOrder(index) });
+      }
+
+      for (const item of itemArray) {
+        if (item.fields.id) {
+          item.id = item.fields.id;
+          delete item.fields.id;
+        }
+
+        if (item.fields.tableid) {
+          item.tableid = item.fields.tableid;
+          delete item.fields.tableid;
+        }
+
+        if (item.fields.createdTime) {
+          item.createdTime = item.fields.createdTime;
+          delete item.fields.createdTime;
+        }
       }
 
       const data = {
-        command: "update",
+        command: "orderitems",
         email: this.login.email,
         password: this.login.password,
       };
@@ -692,6 +779,11 @@ export default {
     },
 
     addItem() {
+      if (this.saveFlag) {
+        this.alertSaveFlag();
+        return;
+      }
+
       this.editingNewItem = true;
       const index = this.localItems.length;
       this.currentIndex = index;
@@ -708,8 +800,7 @@ export default {
       fields.index = index;
 
       this.localItems.push({
-        createdTime: new Date(),
-        fields,
+        ...fields,
         id: "",
       });
 
@@ -727,6 +818,15 @@ export default {
 
         inputs[0].focus();
       });
+    },
+
+    sortItems() {
+      if (this.saveFlag) {
+        this.alertSaveFlag();
+        return;
+      }
+
+      console.log("SORT", JSON.parse(JSON.stringify(this.localItems)));
     },
 
     base64svg(image) {
@@ -779,13 +879,9 @@ export default {
     },
 
     removeFile(index, inputName) {
-      if (
-        this.localItems[index] &&
-        this.localItems[index].fields &&
-        this.localItems[index].fields.bild
-      ) {
+      if (this.localItems[index] && this.localItems[index].bild) {
         this.$refs[inputName][0].value = "";
-        this.localItems[index].fields.bild[0] = { url: "" };
+        this.localItems[index].bild[0] = { url: "" };
       }
     },
   },
@@ -821,6 +917,10 @@ export default {
         this.dragDelay = 86400000;
       }
     },
+
+    selectDate(date) {
+      this.selectDate = date;
+    },
   },
 };
 </script>
@@ -848,5 +948,25 @@ export default {
 
 .cms-item {
   cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(100%) brightness(100%);
+}
+</style>
+
+<style>
+.dp-custom-input {
+  padding-left: 2.3rem !important;
+  border-radius: 0px;
+}
+
+input[type="checkbox"]:checked + span {
+  background-color: #3898ec;
+  background-image: url("https://d3e54v103j8qbb.cloudfront.net/static/custom-checkbox-checkmark.589d534424.svg");
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-color: #3898ec;
 }
 </style>
