@@ -290,6 +290,11 @@ blockquote {
 
 .cms-input.message {
   min-height: 7rem;
+  color: #fff;
+  font-family: Droid Sans, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.4rem;
 }
 
 .cms-input.hide1 {
@@ -540,6 +545,7 @@ blockquote {
 }
 
 .loader {
+  z-index: 100;
   grid-column-gap: 16px;
   grid-row-gap: 16px;
   background-color: #0f0f0f;
@@ -553,7 +559,6 @@ blockquote {
   bottom: 0%;
   left: 0%;
   right: 0%;
-  z-index: 100;
 }
 
 .loader-container {
