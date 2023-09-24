@@ -46,8 +46,26 @@
       <div @click="addItem()" class="cms-button add-new-item w-button">
         + Add new item
       </div>
-      <div @click="sortItems()" class="cms-button sort-by-date w-button">
-        Sort list by date
+      <div class="relative">
+        <div @click="sortItems" class="cms-button sort-by-date w-button">
+          Sort list by date
+        </div>
+
+        <div v-if="showDateList" class="datelist-wrapper">
+          <div class="text-s">Choose date field</div>
+          <div class="datelist-content">
+            <div v-if="getDateList().length < 1" class="text-s datelist">
+              No date fields
+            </div>
+            <div
+              v-for="date of getDateList()"
+              @click="sortDateField"
+              class="text-s datelist"
+            >
+              {{ date.name }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -408,6 +426,8 @@ export default {
       appError: false,
       cmsSettingsMenu: false,
       selectDate: new Date(),
+      showDateList: false,
+      sortOrder: false,
 
       chevronDown: chevronDown,
       gripVertical: gripVertical,
@@ -430,11 +450,6 @@ export default {
     );
 
     this.loadData();
-
-    setTimeout(() => {
-      console.log("SCHEMA", JSON.parse(JSON.stringify(this.schema)));
-      console.log("ITEMS", JSON.parse(JSON.stringify(this.items)));
-    }, 3000);
   },
 
   methods: {
@@ -827,7 +842,75 @@ export default {
         return;
       }
 
-      console.log("SORT", JSON.parse(JSON.stringify(this.localItems)));
+      this.showDateList = !this.showDateList;
+    },
+
+    getDateList() {
+      const dateList = [];
+
+      for (const item of this.schema[this.schemaIndex].fields) {
+        if (item.type === "date") {
+          dateList.push(item);
+        }
+      }
+
+      return dateList;
+    },
+
+    sortDateField(event) {
+      const sortedItems = [];
+      const sortedItemNulls = [];
+
+      for (const item of this.localItems) {
+        if (item[event.target.innerText]) {
+          sortedItems.push(item);
+        } else {
+          sortedItemNulls.push(item);
+        }
+      }
+
+      if (!this.sortOrder) {
+        this.sortOrder = true;
+
+        sortedItems.sort((a, b) => {
+          const dateA = new Date(a[event.target.innerText]);
+          const dateB = new Date(b[event.target.innerText]);
+          return dateA - dateB; // Ascending order
+        });
+      } else {
+        this.sortOrder = false;
+
+        sortedItems.sort((a, b) => {
+          const dateA = new Date(a[event.target.innerText]);
+          const dateB = new Date(b[event.target.innerText]);
+          return dateB - dateA; // Descending order
+        });
+      }
+
+      const allItems = sortedItems.concat(sortedItemNulls);
+      const newList = [];
+      let numberNulls = 0;
+
+      // pair them based on the index and with the nulls (undated objects) always in their original place
+      for (const [index, all] of Object.entries(allItems)) {
+        let isNull = false;
+
+        for (const nullItem of sortedItemNulls) {
+          if (parseInt(nullItem.index) === parseInt(index)) {
+            newList.push(nullItem);
+            isNull = true;
+            numberNulls = numberNulls + 1;
+          }
+        }
+
+        if (!isNull) {
+          newList.push(sortedItems[parseInt(index - numberNulls)]);
+        }
+      }
+
+      this.localItems = JSON.parse(JSON.stringify(newList));
+      this.showDateList = false;
+      this.saveAllItems();
     },
 
     base64svg(image) {
@@ -969,5 +1052,21 @@ input[type="checkbox"]:checked + span {
   background-repeat: no-repeat;
   background-size: cover;
   border-color: #3898ec;
+}
+
+.datelist-content {
+  scrollbar-width: thin;
+  scrollbar-color: dimgray rgba(42, 43, 42, 0.95);
+}
+.datelist-content::-webkit-scrollbar {
+  width: 10px;
+}
+.datelist-content::-webkit-scrollbar-track {
+  background: rgba(42, 43, 42, 0.95);
+}
+.datelist-content::-webkit-scrollbar-thumb {
+  background-color: dimgray;
+  border-radius: 20px;
+  border: 3px solid rgba(42, 43, 42, 0.95);
 }
 </style>
