@@ -1,16 +1,15 @@
 <template>
   <div class="simple-cms-wrapper">
     <div class="navbar">
-      <img
+      <house
         @click="backHomepage"
-        :src="base64svg(house)"
         id="w-node-_9debdf39-b234-1d75-2a2c-19226d1fb725-d10df2f5"
-        alt=""
+        style="color: white"
         class="cms-back-home"
-      /><img
+      />
+      <gear
         @click="cmsSettingsMenu = !cmsSettingsMenu"
-        :src="base64svg(gear)"
-        alt=""
+        style="color: white"
         class="cms-account-settings"
       />
       <div
@@ -110,10 +109,9 @@
                   id="w-node-e97159e2-8ebc-f0c7-089d-ad3d67bfd80a-d10df2f5"
                   class="item-title-wrapper"
                 >
-                  <img
-                    :src="base64svg(gripVertical)"
+                  <gripVertical
                     id="w-node-_3152d18a-1e62-e7da-3fba-64d3117471a9-d10df2f5"
-                    alt=""
+                    style="color: white"
                     class="dragdrop-handle"
                   />
                   <div
@@ -124,22 +122,19 @@
                   </div>
                 </div>
                 <div class="item-grid show4">
-                  <img
-                    :src="base64svg(chevronDown)"
+                  <chevronDown
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
                       !savingAllItemsFlag
                     "
                     id="w-node-ca2ac5e0-9092-1cea-f525-5ac925d9f1af-d10df2f5"
-                    alt=""
                     :class="[
                       showItem === index
                         ? 'arrow-down-white rotated w-embed'
                         : 'arrow-down-white w-embed',
                     ]"
                   />
-
                   <div
                     id="w-node-ca2ac5e0-9092-1cea-f525-5ac925d9f1b0-d10df2f5"
                     class="loader-wrapper"
@@ -212,19 +207,18 @@
                   id="w-node-_9213f67d-0cf0-9708-3dd0-d741737ab529-d10df2f5"
                   class="item-grid hide4"
                 >
-                  <img
-                    :src="base64svg(chevronDown)"
+                  <chevronDown
                     v-if="
                       (!savingItemFlag ||
                         (savingItemFlag && currentIndex !== index)) &&
                       !savingAllItemsFlag
                     "
+                    id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
                     :class="[
                       showItem === index
                         ? 'arrow-down-white rotated w-embed'
                         : 'arrow-down-white w-embed',
                     ]"
-                    id="w-node-_3a59ea88-5010-113e-e088-49750bc9b22a-d10df2f5"
                   />
                   <div
                     id="w-node-e9ae915b-0548-dc33-9e2a-f43e8d03efd7-d10df2f5"
@@ -357,11 +351,9 @@
                       {{ displayFilename(item[input.name]) }}
                     </label>
 
-                    <img
+                    <xmark
                       @click.stop="removeFile(index, `${input.name}-${index}`)"
-                      :src="base64svg(xmark)"
-                      loading="lazy"
-                      alt=""
+                      style="color: white"
                       class="remove-image"
                     />
                   </div>
@@ -389,15 +381,25 @@ import "vue-easy-dnd/dist/dnd.css";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 
-import chevronDown from "../images/chevron-down.svg?raw";
-import gripVertical from "../images/grip-vertical.svg?raw";
-import house from "../images/house.svg?raw";
-import gear from "../images/gear.svg?raw";
-import xmark from "../images/xmark.svg?raw";
+import chevronDown from "../images/chevron-down.vue";
+import gripVertical from "../images/grip-vertical.vue";
+import house from "../images/house.vue";
+import gear from "../images/gear.vue";
+import xmark from "../images/xmark.vue";
 
 export default {
   name: "Cms",
-  components: { Vue3Lottie, Drag, DropList, VueDatePicker },
+  components: {
+    Vue3Lottie,
+    Drag,
+    DropList,
+    VueDatePicker,
+    chevronDown,
+    gripVertical,
+    house,
+    gear,
+    xmark,
+  },
 
   data() {
     return {
@@ -430,12 +432,6 @@ export default {
       selectDate: new Date(),
       showDateList: false,
       sortOrder: false,
-
-      chevronDown: chevronDown,
-      gripVertical: gripVertical,
-      house: house,
-      gear: gear,
-      xmark: xmark,
     };
   },
 
@@ -913,10 +909,6 @@ export default {
       this.localItems = JSON.parse(JSON.stringify(newList));
       this.showDateList = false;
       this.saveAllItems();
-    },
-
-    base64svg(image) {
-      return `data:image/svg+xml;base64,${btoa(image)}`;
     },
 
     getLocalStorage(name) {
