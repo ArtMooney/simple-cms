@@ -376,6 +376,8 @@
         <div class="text-s text-black">Sorry, but something went wrong...</div>
       </div>
     </div>
+
+    <div v-if="savingItemFlag || savingAllItemsFlag" class="saveblocker"></div>
   </div>
 </template>
 
@@ -1036,6 +1038,10 @@ export default {
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(100%) brightness(100%);
+}
+
+.saveblocker {
+  display: block;
 }
 </style>
 
