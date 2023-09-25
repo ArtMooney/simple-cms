@@ -768,6 +768,7 @@ export default {
     deleteItem(index) {
       this.savingItemFlag = true;
       this.saveFlag = false;
+      this.currentIndex = index;
 
       setTimeout(async () => {
         this.showItem = false;
