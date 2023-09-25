@@ -554,7 +554,7 @@ blockquote {
   grid-auto-columns: 1fr;
   justify-content: center;
   align-items: flex-start;
-  position: absolute;
+  position: fixed;
   top: 0%;
   bottom: 0%;
   left: 0%;
@@ -801,7 +801,15 @@ blockquote {
     padding-right: 1rem;
   }
 
-  .cms-settings-menu,
+  .cms-settings-menu {
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  .cms-title {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+
   .datelist-wrapper {
     background-color: rgba(0, 0, 0, 0.9);
   }
