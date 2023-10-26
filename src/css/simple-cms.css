@@ -1,3 +1,8 @@
+:root {
+  --white: white;
+  --black: black;
+}
+
 .w-checkbox {
   margin-bottom: 5px;
   padding-left: 20px;
@@ -290,7 +295,7 @@ blockquote {
 
 .cms-input.message {
   min-height: 7rem;
-  color: #fff;
+  color: var(--white);
   font-family: Droid Sans, sans-serif;
   font-size: 0.9rem;
   font-weight: 400;
@@ -808,10 +813,6 @@ blockquote {
   .cms-title {
     font-size: 2.5rem;
     line-height: 3rem;
-  }
-
-  .datelist-wrapper {
-    background-color: rgba(0, 0, 0, 0.9);
   }
 }
 

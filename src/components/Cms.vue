@@ -169,7 +169,7 @@
                   <div
                     id="w-node-_0b476731-d8fb-2341-5ad4-24f0f7c9aac8-d10df2f5"
                     v-if="showItem === index && saveFlag"
-                    @click.stop="saveItem(index)"
+                    @click.stop="saveItem(index, item)"
                     :class="[
                       blinkAnim === true
                         ? 'cms-button controls w-button blinking'
@@ -327,14 +327,7 @@
                         getInputType(input.type) === 'file'
                       "
                       @click="handleInput"
-                      @change="
-                        handleFileInput(
-                          $event,
-                          item[input.name],
-                          input.name,
-                          item
-                        )
-                      "
+                      @change="handleFileInput($event, input.name, item)"
                       :id="`${input.name}-${index}`"
                       :ref="`${input.name}-${index}`"
                       class="hide1"
@@ -352,7 +345,9 @@
                     </label>
 
                     <xmark
-                      @click.stop="removeFile(index, `${input.name}-${index}`)"
+                      @click.stop="
+                        removeFile(index, `${input.name}-${index}`, input.name)
+                      "
                       style="color: white"
                       class="remove-image"
                     />
@@ -406,14 +401,14 @@ export default {
       schema: [],
       items: [],
       localItems: [],
-      userName: "FrameCore",
-      userPass: "CMS-development",
       login: {},
-      apiBaseUrl: "https://api.framecore.se/webhook/simple-cms-dev/",
-      cmsGetBaseSchema: "get-base",
-      cmsGetWebhook: "get-items",
-      cmsSetWebhook: "set",
+      cmsGetSchema: "http://0.0.0.0:8787/schema",
+      cmsUpdateItem: "http://0.0.0.0:8787/update",
+      cmsUpdateItems: "http://0.0.0.0:8787/update-batch",
+      cmsAddItem: "http://0.0.0.0:8787/add",
+      cmsDeleteItem: "http://0.0.0.0:8787/delete",
       cmsName: "{{ simple }} CMS",
+      baserowClientToken: "ut84FNQWZzasN9CHp3Wgg9DX9ymhZcje",
       showItem: false,
       saveFlag: false,
       savingItemFlag: false,
@@ -442,22 +437,30 @@ export default {
       this.login = this.getLocalStorage("simple-cms-login");
     }
 
-    this.schema = await this.getCmsData(
-      this.apiBaseUrl + this.cmsGetBaseSchema,
-      "email=" + this.login.email + "&password=" + this.login.password
+    const query = encodeURIComponent(
+      `email=${this.login.email}&password=${this.login.password}`
     );
+
+    this.schema = await fetch(this.cmsGetSchema + "?" + query).then(
+      (response) => response.json()
+    );
+
+    for (const schema of this.schema) {
+      schema.fields = await this.getFetch(
+        `https://api.baserow.io/api/database/fields/table/${schema.id}/`,
+        new Headers({ Authorization: "Token " + this.baserowClientToken })
+      );
+    }
 
     this.loadData();
   },
 
   methods: {
-    getCmsData(urlEndpoint, options) {
+    getFetch(urlEndpoint, headers, options) {
       return new Promise((resolve, reject) => {
         var requestOptions = {
           method: "GET",
-          headers: {
-            Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
-          },
+          headers: headers,
           redirect: "follow",
         };
 
@@ -472,23 +475,16 @@ export default {
           })
           .catch((error) => {
             // console.log(error);
-
-            this.loadingFlag = false;
-            this.appError = true;
             reject(error);
           });
       });
     },
 
-    postCmsData(urlEndpoint, data) {
+    postFetch(urlEndpoint, body) {
       return new Promise((resolve, reject) => {
         var requestOptions = {
           method: "POST",
-          headers: {
-            Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
-          },
-
-          body: data,
+          body: JSON.stringify(body),
           redirect: "follow",
         };
 
@@ -503,47 +499,28 @@ export default {
           })
           .catch((error) => {
             // console.log(error);
-
-            this.loadData();
-            this.appError = true;
             reject(error);
           });
       });
     },
 
-    formDataWrapper(form, data, dataObject) {
-      let formData = new FormData();
-
-      if (form) {
-        for (const item of form.querySelectorAll("input")) {
-          if (item.type === "file") {
-            if (item.files[0]) {
-              for (const file of item.files) {
-                formData.append(item.name, file, file.name);
-              }
-            }
-          }
-        }
-      }
-
-      // add the data-fields
-      for (const [key, value] of Object.entries(data)) {
-        formData.append(key, value);
-      }
-
-      // add the data-object
-      formData.append("dataobject", JSON.stringify(dataObject));
-
-      return formData;
-    },
-
     async loadData() {
       this.loadingFlag = true;
 
-      this.items = await this.getCmsData(
-        this.apiBaseUrl + this.cmsGetWebhook,
-        "id=" + this.schema[this.schemaIndex].id
-      );
+      this.items = await fetch(
+        `https://api.baserow.io/api/database/rows/table/${
+          this.schema[this.schemaIndex].id
+        }/?size=200&user_field_names=true`,
+        { headers: { Authorization: "Token " + this.baserowClientToken } }
+      )
+        .then((response) => response.json())
+        .then((data) => data.results);
+
+      this.items.sort((a, b) => {
+        const indexA = a.index;
+        const indexB = b.index;
+        return indexA - indexB; // Ascending order
+      });
 
       this.localItems = JSON.parse(JSON.stringify(this.items));
 
@@ -591,33 +568,50 @@ export default {
       this.showItem = true;
     },
 
-    handleFileInput(event, input, name, inputFields) {
+    async handleFileInput(event, name, inputFields) {
       if (!event.target.files[0].name) return;
 
-      const fileName = event.target.files[0].name;
+      inputFields[name] = [
+        {
+          name: event.target.files[0].name,
+          file: await this.readEncodeFiles(event.target.files),
+        },
+      ];
+    },
 
-      if (!input) {
-        inputFields[name] = [{ url: fileName }];
-      } else {
-        Object.keys(input[0]).forEach(function (key) {
-          delete input[0][key];
-        });
+    readEncodeFiles(files) {
+      return new Promise((resolve, reject) => {
+        if (files.length > 0) {
+          var selectedFile = files[0];
+          var reader = new FileReader();
 
-        input[0].url = fileName;
-      }
+          reader.onload = function (e) {
+            var base64Data = e.target.result.split(",")[1];
+            resolve(base64Data);
+          };
+
+          reader.onerror = function (error) {
+            reject(error);
+          };
+
+          // Read the file as a data URL, which will be Base64-encoded
+          reader.readAsDataURL(selectedFile);
+        } else {
+          reject(new Error("No files to process."));
+        }
+      });
     },
 
     getInputType(type) {
       let inputType = "text";
 
-      if (type === "multilineText") {
+      if (type === "long_text") {
         inputType = "textarea";
       } else if (type === "date") {
-        // this needs to be supported in the cms before use
         inputType = "date";
-      } else if (type === "checkbox") {
+      } else if (type === "boolean") {
         inputType = "checkbox";
-      } else if (type === "multipleAttachments") {
+      } else if (type === "file") {
         inputType = "file";
       }
 
@@ -634,7 +628,7 @@ export default {
         const itemsObject = JSON.stringify(items[index]);
 
         if (localObject !== itemsObject) {
-          if (input !== "" && input !== false && input !== null) {
+          if (input !== "" && input !== null) {
             modified = true;
           }
         }
@@ -662,51 +656,61 @@ export default {
 
     getItemOrder(index) {
       let itemJson = {};
+      itemJson = {};
       itemJson.index = index;
       itemJson.id = this.localItems[index].id;
-      itemJson.tableid = this.schema[this.schemaIndex].id;
 
       return itemJson;
     },
 
-    async saveItem(index) {
+    async saveItem(index, item) {
       this.savingItemFlag = true;
       this.saveFlag = false;
 
       if (this.editingNewItem) {
-        const data = {
-          command: "add",
-          email: this.login.email,
-          password: this.login.password,
-        };
+        for (const field of this.schema[this.schemaIndex].fields) {
+          if (field.type === "date") {
+            item[field.name] = this.convertDateToIso(item[field.name]);
+          }
+        }
 
-        const savedItem = await this.postCmsData(
-          this.apiBaseUrl + this.cmsSetWebhook,
-          this.formDataWrapper(this.getFormElement(index), data, [
-            this.getItemJson(index),
-          ])
+        const query = encodeURIComponent(
+          `email=${this.login.email}&password=${this.login.password}`
         );
 
-        this.editingNewItem = false;
-        this.localItems[index] = savedItem[0].fields;
-        this.localItems[index].id = savedItem[0].id;
-      } else {
-        const data = {
-          command: "update",
-          email: this.login.email,
-          password: this.login.password,
-        };
+        const savedItem = await this.postFetch(this.cmsAddItem + "?" + query, {
+          item,
+          tableid: this.schema[this.schemaIndex].id,
+          fields: this.schema[this.schemaIndex].fields,
+        });
 
-        await this.postCmsData(
-          this.apiBaseUrl + this.cmsSetWebhook,
-          this.formDataWrapper(this.getFormElement(index), data, [
-            this.getItemJson(index),
-          ])
+        this.editingNewItem = false;
+        this.localItems[index] = savedItem;
+        this.localItems[index].id = savedItem.id;
+      } else {
+        for (const field of this.schema[this.schemaIndex].fields) {
+          if (field.type === "date") {
+            item[field.name] = this.convertDateToIso(item[field.name]);
+          }
+        }
+
+        const query = encodeURIComponent(
+          `email=${this.login.email}&password=${this.login.password}`
+        );
+
+        const updateItem = await this.postFetch(
+          this.cmsUpdateItem + "?" + query,
+          {
+            item,
+            tableid: this.schema[this.schemaIndex].id,
+            fields: this.schema[this.schemaIndex].fields,
+          }
         );
       }
 
       this.items = JSON.parse(JSON.stringify(this.localItems));
       this.savingItemFlag = false;
+      this.saveFlag = false;
       this.showItem = false;
     },
 
@@ -716,6 +720,21 @@ export default {
       )[0];
     },
 
+    convertDateToIso(date) {
+      if (!date) return null;
+
+      const originalDate = date;
+      const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+      if (isoDatePattern.test(originalDate)) {
+        return originalDate;
+      } else {
+        // Convert the non-ISO date to ISO format and extract only the date part
+        const isoDate = new Date(originalDate).toISOString().split("T")[0];
+        return isoDate;
+      }
+    },
+
     async saveAllItems() {
       const itemArray = [];
       this.savingAllItemsFlag = true;
@@ -723,35 +742,20 @@ export default {
 
       for (const [index, item] of Object.entries(this.localItems)) {
         item.index = index;
-        itemArray.push({ fields: this.getItemOrder(index) });
+        itemArray.push(this.getItemOrder(index));
       }
 
-      for (const item of itemArray) {
-        if (item.fields.id) {
-          item.id = item.fields.id;
-          delete item.fields.id;
+      const query = encodeURIComponent(
+        `email=${this.login.email}&password=${this.login.password}`
+      );
+
+      const updateItems = await this.postFetch(
+        this.cmsUpdateItems + "?" + query,
+        {
+          items: itemArray,
+          tableid: this.schema[this.schemaIndex].id,
+          fields: this.schema[this.schemaIndex].fields,
         }
-
-        if (item.fields.tableid) {
-          item.tableid = item.fields.tableid;
-          delete item.fields.tableid;
-        }
-
-        if (item.fields.createdTime) {
-          item.createdTime = item.fields.createdTime;
-          delete item.fields.createdTime;
-        }
-      }
-
-      const data = {
-        command: "orderitems",
-        email: this.login.email,
-        password: this.login.password,
-      };
-
-      await this.postCmsData(
-        this.apiBaseUrl + this.cmsSetWebhook,
-        this.formDataWrapper(null, data, itemArray)
       );
 
       this.items = JSON.parse(JSON.stringify(this.localItems));
@@ -773,23 +777,19 @@ export default {
       setTimeout(async () => {
         this.showItem = false;
 
-        const data = {
-          command: "delete",
-          email: this.login.email,
-          password: this.login.password,
-        };
-
-        await this.postCmsData(
-          this.apiBaseUrl + this.cmsSetWebhook,
-          this.formDataWrapper(null, data, [this.getItemJson(index)])
+        const currentItem = this.getItemJson(index);
+        const query = encodeURIComponent(
+          `tableid=${currentItem.tableid}&id=${currentItem.id}&email=${this.login.email}&password=${this.login.password}`
         );
+
+        const deletedItem = await fetch(this.cmsDeleteItem + "?" + query);
 
         this.localItems.splice(index, 1);
 
         this.items = JSON.parse(JSON.stringify(this.localItems));
         this.savingItemFlag = false;
 
-        this.saveAllItems();
+        this.saveAllItems(); // to reindex after delete
       }, 100);
     },
 
@@ -805,8 +805,10 @@ export default {
       let fields = {};
 
       for (const item of this.schema[this.schemaIndex].fields) {
-        if (item.type === "checkbox") {
+        if (item.type === "boolean") {
           fields[item.name] = false;
+        } else if (item.type === "file") {
+          fields[item.name] = [];
         } else {
           fields[item.name] = "";
         }
@@ -946,21 +948,21 @@ export default {
     },
 
     displayFilename(filename) {
-      if (filename) {
-        if (filename[0].filename) {
-          return filename[0].filename;
-        } else if (filename[0].url) {
-          return filename[0].url;
+      if (filename.length > 0) {
+        if (filename[0].visible_name) {
+          return filename[0].visible_name;
+        } else if (filename[0].name) {
+          return filename[0].name;
         }
       }
 
       return "Click here to choose an image.";
     },
 
-    removeFile(index, inputName) {
-      if (this.localItems[index] && this.localItems[index].bild) {
+    removeFile(index, inputName, fieldName) {
+      if (this.localItems[index] && this.localItems[index][fieldName]) {
         this.$refs[inputName][0].value = "";
-        this.localItems[index].bild[0] = { url: "" };
+        this.localItems[index][fieldName] = [];
       }
     },
   },
