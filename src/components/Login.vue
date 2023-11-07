@@ -59,6 +59,7 @@
           Reset password
         </div>
         <input
+          v-model="loginEmail"
           type="email"
           class="cms-input w-input"
           maxlength="256"
@@ -79,7 +80,10 @@
           >Know your password?</a
         >
       </form>
-      <div class="success-message w-form-done"></div>
+      <div class="success-message w-form-done">
+        An email has been sent to your registered email address with a link to
+        reset your password.
+      </div>
       <div class="error-message text-s w-form-fail">
         Oops! Something went wrong when sending the reset link.
       </div>
@@ -147,7 +151,10 @@ export default {
     return {
       userName: "FrameCore",
       userPass: "CMS-development",
-      apiBaseUrl: "https://api.framecore.se/webhook/simple-cms/",
+      cmsLogin: "http://0.0.0.0:8787/login",
+      cmsReset: "http://0.0.0.0:8787/reset",
+      cmsValidation: "http://0.0.0.0:8787/validate",
+      cmsNewPass: "http://0.0.0.0:8787/new-password",
       loadingFlag: true,
       initLoadedFlag: false,
       appError: false,
@@ -159,10 +166,6 @@ export default {
       validationCode: "",
       inputPasswordOne: "",
       inputPasswordTwo: "",
-      cmsLogin: "login",
-      cmsReset: "reset-email",
-      cmsValidation: "validate-id",
-      cmsNewPass: "new-password",
       emailErrorMessage:
         "One or more email addresses that you have provided do not appear to have a correct format.",
       passwordErrorMessage:
@@ -257,10 +260,11 @@ export default {
         const varCheck = hrefCheck[1].split("=");
 
         if (varCheck[0] === "validation" && varCheck[1]) {
-          const verification = await this.getCmsData(
-            this.apiBaseUrl + this.cmsValidation,
-            "validation=" + varCheck[1]
-          );
+          const query = encodeURIComponent(`validation=${varCheck[1]}`);
+
+          const verification = await fetch(
+            this.cmsValidation + "?" + query
+          ).then((response) => response.json());
 
           if (verification.status === "ok") {
             isPasswordSwitch = true;
@@ -309,7 +313,11 @@ export default {
       event.submitter.value = event.submitter.dataset.wait;
 
       if (this.requiredFields(event.target.parentElement)) {
-        fetch(this.apiBaseUrl + this.cmsLogin, this.getRequestOptions(event))
+        const query = encodeURIComponent(
+          `email=${this.loginEmail}&password=${this.loginPassword}`
+        );
+
+        fetch(this.cmsLogin + "?" + query)
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -351,7 +359,11 @@ export default {
       event.submitter.value = event.submitter.dataset.wait;
 
       if (this.requiredFields(event.target.parentElement)) {
-        fetch(this.apiBaseUrl + this.cmsReset, this.getRequestOptions(event))
+        const query = encodeURIComponent(
+          `email=${this.loginEmail}&pageuri=${window.location.href}`
+        );
+
+        fetch(this.cmsReset + "?" + query)
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -363,7 +375,7 @@ export default {
               event.target.style.display = "none";
               successMessage.style.display = "block";
 
-              location.reload();
+              // location.reload();
             } else {
               this.triggerErrorMessage(errorMessage, this.passwordErrorMessage);
               event.submitter.value = submitterBak;
@@ -390,7 +402,11 @@ export default {
       }
 
       if (this.requiredFields(event.target.parentElement)) {
-        fetch(this.apiBaseUrl + this.cmsNewPass, this.getRequestOptions(event))
+        const query = encodeURIComponent(
+          `password=${this.inputPasswordOne}&validation=${this.validationCode}`
+        );
+
+        fetch(this.cmsNewPass + "?" + query)
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -430,17 +446,6 @@ export default {
       return event.target.parentElement.getElementsByClassName(
         "error-message"
       )[0];
-    },
-
-    getRequestOptions(event) {
-      return {
-        method: "POST",
-        headers: {
-          Authorization: "Basic " + btoa(this.userName + ":" + this.userPass),
-        },
-        body: this.formCollector(event.target),
-        redirect: "follow",
-      };
     },
 
     isPasswordSameTwice() {
@@ -507,55 +512,6 @@ export default {
         );
 
       return requiredFilled;
-    },
-
-    formCollector(form) {
-      let formData = new FormData();
-      formData.append("form-name", form.dataset.name);
-
-      // append all inputs except submit-button
-      for (const item of form.querySelectorAll("input")) {
-        if (item.type !== "submit") {
-          if (item.type === "file") {
-            if (item.files[0]) {
-              for (const file of item.files) {
-                formData.append(item.name, file, file.name);
-              }
-            }
-          } else if (
-            item.name !== "gdpr-confirm" &&
-            item.name !== "clientip" &&
-            item.name !== "pageuri" &&
-            item.name !== "pagename" &&
-            item.name !== "amex"
-          ) {
-            if (item.type === "checkbox") {
-              formData.append(item.name, item.checked);
-            } else if (item.type === "radio") {
-              formData.append(item.name, item.checked);
-            } else {
-              formData.append(item.name, item.value);
-            }
-          }
-        }
-      }
-
-      // append all textareas
-      for (const item of form.querySelectorAll("textarea")) {
-        formData.append(item.name, item.value);
-      }
-
-      // Get all relevant selectors
-      for (const item of form.querySelectorAll("select")) {
-        formData.append(item.name, item.value);
-      }
-
-      // add the extra-fields
-      for (const [key, value] of Object.entries(this.extraFields)) {
-        formData.append(key, value);
-      }
-
-      return formData;
     },
 
     triggerErrorMessage(errorMessage, message) {

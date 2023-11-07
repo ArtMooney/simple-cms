@@ -24,6 +24,8 @@ export default {
   },
 
   created() {
+    // this.deleteLocalStorage("simple-cms-login");
+
     if (!this.getLocalStorage("simple-cms-login")) {
       this.loginFlag = true;
     } else {

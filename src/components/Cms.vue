@@ -402,11 +402,11 @@ export default {
       items: [],
       localItems: [],
       login: {},
-      cmsGetSchema: "http://0.0.0.0:8787/schema",
-      cmsUpdateItem: "http://0.0.0.0:8787/update",
-      cmsUpdateItems: "http://0.0.0.0:8787/update-batch",
-      cmsAddItem: "http://0.0.0.0:8787/add",
-      cmsDeleteItem: "http://0.0.0.0:8787/delete",
+      cmsGetSchema: `${import.meta.env.VITE_APP_CMS_URL}/schema`,
+      cmsUpdateItem: `${import.meta.env.VITE_APP_CMS_URL}/update`,
+      cmsUpdateItems: `${import.meta.env.VITE_APP_CMS_URL}/update-batch`,
+      cmsAddItem: `${import.meta.env.VITE_APP_CMS_URL}/add`,
+      cmsDeleteItem: `${import.meta.env.VITE_APP_CMS_URL}/delete`,
       cmsName: "{{ simple }} CMS",
       baserowClientToken: "ut84FNQWZzasN9CHp3Wgg9DX9ymhZcje",
       showItem: false,
@@ -431,8 +431,6 @@ export default {
   },
 
   async created() {
-    console.clear();
-
     if (this.getLocalStorage("simple-cms-login")) {
       this.login = this.getLocalStorage("simple-cms-login");
     }
@@ -714,12 +712,6 @@ export default {
       this.showItem = false;
     },
 
-    getFormElement(index) {
-      return this.$refs["list-item-" + index].$el.querySelectorAll(
-        ".cms-inputs"
-      )[0];
-    },
-
     convertDateToIso(date) {
       if (!date) return null;
 
@@ -948,7 +940,7 @@ export default {
     },
 
     displayFilename(filename) {
-      if (filename.length > 0) {
+      if (filename && filename.length > 0) {
         if (filename[0].visible_name) {
           return filename[0].visible_name;
         } else if (filename[0].name) {
@@ -989,6 +981,7 @@ export default {
     schemaIndex() {
       this.showItem = false;
       this.loadData();
+      window.scrollTo(0, 0);
     },
 
     showItem() {
