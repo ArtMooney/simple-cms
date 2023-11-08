@@ -627,10 +627,15 @@ export default {
         const localObject = JSON.stringify(input);
         const itemsObject = JSON.stringify(items[index]);
 
-        if (localObject !== itemsObject) {
-          if (input !== "" && input !== null) {
-            modified = true;
-          }
+        if (
+          (localObject !== itemsObject &&
+            index === this.schema[this.schemaIndex].fields[0].name &&
+            input.trim() !== "") ||
+          (localObject !== itemsObject &&
+            input !== null &&
+            index !== this.schema[this.schemaIndex].fields[0].name)
+        ) {
+          modified = true;
         }
       }
 
