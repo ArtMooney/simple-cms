@@ -215,7 +215,7 @@ blockquote {
 
 .simple-cms-wrapper {
   min-height: 110vh;
-  background-color: #474747;
+  background-color: #363636;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
@@ -614,12 +614,12 @@ blockquote {
   color: #ebebeb;
   text-align: center;
   text-transform: none;
-  margin-top: 0;
   margin-bottom: 1rem;
+  margin-right: 1rem;
   font-family: Exo, sans-serif;
-  font-size: 3.5rem;
+  font-size: 3.2rem;
   font-weight: 700;
-  line-height: 3.5rem;
+  line-height: 3.7rem;
 }
 
 .hide1 {
@@ -711,6 +711,13 @@ blockquote {
   right: 0%;
 }
 
+.title-wrapper {
+  justify-content: center;
+  align-items: baseline;
+  margin-top: -3rem;
+  display: flex;
+}
+
 @media screen and (max-width: 991px) {
   h1 {
     font-size: 3rem;
@@ -745,7 +752,15 @@ blockquote {
     grid-auto-columns: auto;
   }
 
-  .cms-items-block,
+  .cms-items-block {
+    width: 100%;
+  }
+
+  .cms-title {
+    font-size: 2.5rem;
+    line-height: 3rem;
+  }
+
   .cms-items-menu {
     width: 100%;
   }
@@ -811,8 +826,16 @@ blockquote {
   }
 
   .cms-title {
-    font-size: 2.5rem;
-    line-height: 3rem;
+    margin-bottom: 0;
+    margin-right: 0;
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+
+  .title-wrapper {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
   }
 }
 
@@ -897,7 +920,15 @@ blockquote {
     display: none;
   }
 
-  .cms-settings-menu,
+  .cms-settings-menu {
+    grid-template-columns: auto;
+  }
+
+  .cms-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
   .datelist-wrapper {
     grid-template-columns: auto;
   }

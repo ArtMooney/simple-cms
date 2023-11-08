@@ -21,8 +21,10 @@
       </div>
     </div>
 
-    <h1 class="cms-title">{{ cmsName }}</h1>
-    <div>by FrameCore</div>
+    <div class="title-wrapper">
+      <h1 class="cms-title">{{ cmsName }}</h1>
+      <div class="text-s">by FrameCore</div>
+    </div>
 
     <div class="collection-wrapper">
       <div v-for="(table, index) of schema">
