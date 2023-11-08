@@ -416,7 +416,7 @@ export default {
       savingItemFlag: false,
       savingAllItemsFlag: false,
       currentIndex: false,
-      schemaIndex: 1,
+      schemaIndex: 0,
       loaderAnim,
       loadingFlag: true,
       initLoadedFlag: false,
