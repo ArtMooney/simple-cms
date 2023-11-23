@@ -1,5 +1,5 @@
 <template>
-  <div class="simple-cms-wrapper">
+  <div @click="handleClickOutside" class="simple-cms-wrapper">
     <div class="navbar">
       <house
         @click="backHomepage"
@@ -48,7 +48,7 @@
         + Add new item
       </div>
       <div class="relative">
-        <div @click="sortItems" class="cms-button sort-by-date w-button">
+        <div @click.stop="sortItems" class="cms-button sort-by-date w-button">
           Sort list by date
         </div>
 
@@ -63,7 +63,9 @@
               @click="sortDateField"
               class="text-s datelist"
             >
-              {{ date.name }}
+              {{
+                date.name.includes("|") ? date.name.split("|")[0] : date.name
+              }}
             </div>
           </div>
         </div>
@@ -253,7 +255,11 @@
 
                 <template v-for="input of schema[schemaIndex].fields">
                   <div v-if="input.name !== 'index'" class="text-s">
-                    {{ input.name }}
+                    {{
+                      input.name.includes("|")
+                        ? input.name.split("|")[0]
+                        : input.name
+                    }}
                   </div>
                   <input
                     v-if="
@@ -261,7 +267,8 @@
                       getInputType(input.type) !== 'textarea' &&
                       getInputType(input.type) !== 'file' &&
                       getInputType(input.type) !== 'date' &&
-                      getInputType(input.type) !== 'checkbox'
+                      getInputType(input.type) !== 'checkbox' &&
+                      !isToFromType(input.name)
                     "
                     @click="handleInput"
                     v-model="item[input.name]"
@@ -292,7 +299,8 @@
                   <VueDatePicker
                     v-if="
                       input.name !== 'index' &&
-                      getInputType(input.type) === 'date'
+                      (getInputType(input.type) === 'date' ||
+                        isToFromType(input.name))
                     "
                     v-model="item[input.name]"
                     :format="'yyyy-MM-dd'"
@@ -300,6 +308,8 @@
                     auto-apply=""
                     input-class-name="cms-input dp-custom-input w-input"
                     :name="input.name"
+                    :range="isToFromType(input.name)"
+                    @cleared="datePickerCleared"
                   >
                   </VueDatePicker>
 
@@ -522,6 +532,17 @@ export default {
         return indexA - indexB; // Ascending order
       });
 
+      // parse to-from date-fields to json
+      for (const item of this.items) {
+        for (const field of Object.entries(item)) {
+          if (field[0].includes("|") && field[0].includes("to-from")) {
+            if (item[field[0]]) {
+              item[field[0]] = JSON.parse(item[field[0]]);
+            }
+          }
+        }
+      }
+
       this.localItems = JSON.parse(JSON.stringify(this.items));
 
       this.loadingFlag = false;
@@ -548,6 +569,20 @@ export default {
       }
 
       this.currentIndex = index;
+    },
+
+    datePickerCleared(value) {
+      if (!value) {
+        this.$nextTick(() => {
+          this.saveFlag = true;
+        }, 1000);
+      }
+    },
+
+    handleClickOutside(event) {
+      if (event.target.className !== "sort-by-date") {
+        this.showDateList = false;
+      }
     },
 
     alertSaveFlag() {
@@ -618,6 +653,14 @@ export default {
       return inputType;
     },
 
+    isToFromType(inputName) {
+      if (inputName.includes("|") && inputName.split("|")[1] === "to-from") {
+        return true;
+      }
+
+      return false;
+    },
+
     isItemChanged(localItems, items) {
       if ((!items && !localItems) || this.editingNewItem) return null;
 
@@ -671,20 +714,26 @@ export default {
     async saveItem(index, item) {
       this.savingItemFlag = true;
       this.saveFlag = false;
+      const saveData = JSON.parse(JSON.stringify(item));
 
-      if (this.editingNewItem) {
-        for (const field of this.schema[this.schemaIndex].fields) {
-          if (field.type === "date") {
-            item[field.name] = this.convertDateToIso(item[field.name]);
-          }
+      // convert date-format if needed and stringify multidate-fields
+      for (const field of this.schema[this.schemaIndex].fields) {
+        if (field.type === "date") {
+          saveData[field.name] = this.convertDateToIso(saveData[field.name]);
         }
 
+        if (field.name.includes("|") && field.name.includes("to-from")) {
+          saveData[field.name] = JSON.stringify(saveData[field.name]);
+        }
+      }
+
+      if (this.editingNewItem) {
         const query = encodeURIComponent(
           `email=${this.login.email}&password=${this.login.password}`
         );
 
         const savedItem = await this.postFetch(this.cmsAddItem + "?" + query, {
-          item,
+          item: saveData,
           tableid: this.schema[this.schemaIndex].id,
           fields: this.schema[this.schemaIndex].fields,
         });
@@ -693,12 +742,6 @@ export default {
         this.localItems[index] = savedItem;
         this.localItems[index].id = savedItem.id;
       } else {
-        for (const field of this.schema[this.schemaIndex].fields) {
-          if (field.type === "date") {
-            item[field.name] = this.convertDateToIso(item[field.name]);
-          }
-        }
-
         const query = encodeURIComponent(
           `email=${this.login.email}&password=${this.login.password}`
         );
@@ -706,7 +749,7 @@ export default {
         const updateItem = await this.postFetch(
           this.cmsUpdateItem + "?" + query,
           {
-            item,
+            item: saveData,
             tableid: this.schema[this.schemaIndex].id,
             fields: this.schema[this.schemaIndex].fields,
           }
@@ -852,6 +895,10 @@ export default {
         if (item.type === "date") {
           dateList.push(item);
         }
+
+        if (item.name.includes("|") && item.name.includes("to-from")) {
+          dateList.push(item);
+        }
       }
 
       return dateList;
@@ -860,9 +907,17 @@ export default {
     sortDateField(event) {
       const sortedItems = [];
       const sortedItemNulls = [];
+      let sortName = event.target.innerText;
+
+      // assure that we have the full name if special date format
+      for (const item of this.schema[this.schemaIndex].fields) {
+        if (`${sortName}|to-from` === item.name) {
+          sortName = item.name;
+        }
+      }
 
       for (const item of this.localItems) {
-        if (item[event.target.innerText]) {
+        if (item[sortName]) {
           sortedItems.push(item);
         } else {
           sortedItemNulls.push(item);
@@ -873,16 +928,30 @@ export default {
         this.sortOrder = true;
 
         sortedItems.sort((a, b) => {
-          const dateA = new Date(a[event.target.innerText]);
-          const dateB = new Date(b[event.target.innerText]);
+          const dateA =
+            typeof a[sortName] === "object"
+              ? new Date(a[sortName][0])
+              : new Date(a[sortName]);
+          const dateB =
+            typeof b[sortName] === "object"
+              ? new Date(b[sortName][0])
+              : new Date(b[sortName]);
+
           return dateA - dateB; // Ascending order
         });
       } else {
         this.sortOrder = false;
 
         sortedItems.sort((a, b) => {
-          const dateA = new Date(a[event.target.innerText]);
-          const dateB = new Date(b[event.target.innerText]);
+          const dateA =
+            typeof a[sortName] === "object"
+              ? new Date(a[sortName][0])
+              : new Date(a[sortName]);
+          const dateB =
+            typeof b[sortName] === "object"
+              ? new Date(b[sortName][0])
+              : new Date(b[sortName]);
+
           return dateB - dateA; // Descending order
         });
       }
