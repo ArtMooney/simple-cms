@@ -260,11 +260,12 @@ export default {
         const varCheck = hrefCheck[1].split("=");
 
         if (varCheck[0] === "validation" && varCheck[1]) {
-          const query = encodeURIComponent(`validation=${varCheck[1]}`);
-
-          const verification = await fetch(
-            this.cmsValidation + "?" + query
-          ).then((response) => response.json());
+          const verification = await fetch(this.cmsValidation, {
+            method: "POST",
+            body: JSON.stringify({
+              validation: varCheck[1],
+            }),
+          }).then((response) => response.json());
 
           if (verification.status === "ok") {
             isPasswordSwitch = true;
@@ -313,11 +314,14 @@ export default {
       event.submitter.value = event.submitter.dataset.wait;
 
       if (this.requiredFields(event.target.parentElement)) {
-        const query = encodeURIComponent(
-          `email=${this.loginEmail}&password=${this.loginPassword}`
-        );
-
-        fetch(this.cmsLogin + "?" + query)
+        fetch(this.cmsLogin, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Basic " + btoa(`${this.loginEmail}:${this.loginPassword}`),
+          },
+        })
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -359,11 +363,13 @@ export default {
       event.submitter.value = event.submitter.dataset.wait;
 
       if (this.requiredFields(event.target.parentElement)) {
-        const query = encodeURIComponent(
-          `email=${this.loginEmail}&pageuri=${window.location.href}`
-        );
-
-        fetch(this.cmsReset + "?" + query)
+        fetch(this.cmsReset, {
+          method: "POST",
+          body: JSON.stringify({
+            email: this.loginEmail,
+            pageuri: window.location.href,
+          }),
+        })
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();
@@ -402,11 +408,13 @@ export default {
       }
 
       if (this.requiredFields(event.target.parentElement)) {
-        const query = encodeURIComponent(
-          `password=${this.inputPasswordOne}&validation=${this.validationCode}`
-        );
-
-        fetch(this.cmsNewPass + "?" + query)
+        fetch(this.cmsNewPass, {
+          method: "POST",
+          body: JSON.stringify({
+            password: this.inputPasswordOne,
+            validation: this.validationCode,
+          }),
+        })
           .then((response) => {
             if (!response.ok) throw new Error();
             return response.json();

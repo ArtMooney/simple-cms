@@ -447,12 +447,13 @@ export default {
       this.login = this.getLocalStorage("simple-cms-login");
     }
 
-    const query = encodeURIComponent(
-      `email=${this.login.email}&password=${this.login.password}`
-    );
-
-    this.schema = await fetch(this.cmsGetSchema + "?" + query).then(
-      (response) => response.json()
+    this.schema = await this.postFetch(
+      this.cmsGetSchema,
+      new Headers({
+        "Content-Type": "application/json",
+        Authorization:
+          "Basic " + btoa(`${this.login.email}:${this.login.password}`),
+      })
     );
 
     for (const schema of this.schema) {
@@ -470,9 +471,12 @@ export default {
       return new Promise((resolve, reject) => {
         var requestOptions = {
           method: "GET",
-          headers: headers,
           redirect: "follow",
         };
+
+        if (headers !== null && headers !== undefined) {
+          requestOptions.headers = headers;
+        }
 
         fetch(urlEndpoint + (options ? "?" + options : ""), requestOptions)
           .then((response) => {
@@ -490,13 +494,20 @@ export default {
       });
     },
 
-    postFetch(urlEndpoint, body) {
+    postFetch(urlEndpoint, headers, body) {
       return new Promise((resolve, reject) => {
         var requestOptions = {
           method: "POST",
-          body: JSON.stringify(body),
           redirect: "follow",
         };
+
+        if (headers !== null && headers !== undefined) {
+          requestOptions.headers = headers;
+        }
+
+        if (body !== null && body !== undefined) {
+          requestOptions.body = JSON.stringify(body);
+        }
 
         fetch(urlEndpoint, requestOptions)
           .then((response) => {
@@ -728,26 +739,31 @@ export default {
       }
 
       if (this.editingNewItem) {
-        const query = encodeURIComponent(
-          `email=${this.login.email}&password=${this.login.password}`
+        const savedItem = await this.postFetch(
+          this.cmsAddItem,
+          new Headers({
+            "Content-Type": "application/json",
+            Authorization:
+              "Basic " + btoa(`${this.login.email}:${this.login.password}`),
+          }),
+          {
+            item: saveData,
+            tableid: this.schema[this.schemaIndex].id,
+            fields: this.schema[this.schemaIndex].fields,
+          }
         );
-
-        const savedItem = await this.postFetch(this.cmsAddItem + "?" + query, {
-          item: saveData,
-          tableid: this.schema[this.schemaIndex].id,
-          fields: this.schema[this.schemaIndex].fields,
-        });
 
         this.editingNewItem = false;
         this.localItems[index] = savedItem;
         this.localItems[index].id = savedItem.id;
       } else {
-        const query = encodeURIComponent(
-          `email=${this.login.email}&password=${this.login.password}`
-        );
-
         const updateItem = await this.postFetch(
-          this.cmsUpdateItem + "?" + query,
+          this.cmsUpdateItem,
+          new Headers({
+            "Content-Type": "application/json",
+            Authorization:
+              "Basic " + btoa(`${this.login.email}:${this.login.password}`),
+          }),
           {
             item: saveData,
             tableid: this.schema[this.schemaIndex].id,
@@ -787,12 +803,13 @@ export default {
         itemArray.push(this.getItemOrder(index));
       }
 
-      const query = encodeURIComponent(
-        `email=${this.login.email}&password=${this.login.password}`
-      );
-
       const updateItems = await this.postFetch(
-        this.cmsUpdateItems + "?" + query,
+        this.cmsUpdateItems,
+        new Headers({
+          "Content-Type": "application/json",
+          Authorization:
+            "Basic " + btoa(`${this.login.email}:${this.login.password}`),
+        }),
         {
           items: itemArray,
           tableid: this.schema[this.schemaIndex].id,
@@ -820,11 +837,18 @@ export default {
         this.showItem = false;
 
         const currentItem = this.getItemJson(index);
-        const query = encodeURIComponent(
-          `tableid=${currentItem.tableid}&id=${currentItem.id}&email=${this.login.email}&password=${this.login.password}`
+        const deletedItem = await this.postFetch(
+          this.cmsDeleteItem,
+          new Headers({
+            "Content-Type": "application/json",
+            Authorization:
+              "Basic " + btoa(`${this.login.email}:${this.login.password}`),
+          }),
+          {
+            tableid: currentItem.tableid,
+            id: currentItem.id,
+          }
         );
-
-        const deletedItem = await fetch(this.cmsDeleteItem + "?" + query);
 
         this.localItems.splice(index, 1);
 
